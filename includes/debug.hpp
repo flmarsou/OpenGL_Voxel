@@ -1,6 +1,8 @@
-#include <iostream>
-#include <ctime>
-#include <iomanip>
+#pragma once
+
+# include <iostream>
+# include <ctime>
+# include <iomanip>
 
 # define GREEN	"\e[32m"
 # define BLUE	"\e[36m"
