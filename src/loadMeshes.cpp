@@ -74,7 +74,7 @@ mesh_t	loadCubeMesh()
 
 	mesh.indexCount = sizeof(indices) / sizeof(u32);
 
-	debug("Created cube mesh (VAO, VBO, and EBO)!", INFO);
+	debug(INFO, "Created cube mesh (VAO, VBO, and EBO)!");
 
 	return (mesh);
 }

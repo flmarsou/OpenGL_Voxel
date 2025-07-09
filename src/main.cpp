@@ -1,48 +1,47 @@
 #include "types.hpp"
 #include "debug.hpp"
+#include "mesh.hpp"
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 
-#include "load.cpp"
-
-bool	initGLFW(GLFWwindow	*&window)
+static bool	initGLFW(GLFWwindow	*&window)
 {
 	// GLFW: Initializes and configures
 	if (!glfwInit())
 	{
-		debug("Failed to initialize GLFW!", ERROR);
+		debug(ERROR, "Failed to initialize GLFW!");
 		return (false);
 	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	debug("GLFW initialized successfully", SUCCESS);
+	debug(SUCCESS, "GLFW initialized successfully");
 
 	// GLFW: Window creation
 	window = glfwCreateWindow(1024, 768, "Voxel Game", NULL, NULL);
 	if (!window)
 	{
-		debug("Failed to create the window!", ERROR);
+		debug(ERROR, "Failed to create the window!");
 		glfwTerminate();
 		return (false);
 	}
 	glfwMakeContextCurrent(window);
 
-	debug("Window created successfully!", SUCCESS);
+	debug(SUCCESS, "Window created successfully!");
 
 	return (true);
 }
 
-bool	initGLAD()
+static bool	initGLAD()
 {
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
-		debug("Failed to initialize GLAD!", ERROR);
+		debug(ERROR, "Failed to initialize GLAD!");
 		glfwTerminate();
 		return (false);
 	}
 
-	debug("GLAD initialized successfully", SUCCESS);
+	debug(SUCCESS, "GLAD initialized successfully");
 
 	return (true);
 }
@@ -51,11 +50,18 @@ i32	main()
 {
 	GLFWwindow	*window;
 
+	// --- Init Libraries ---
 	if (!initGLFW(window) || !initGLAD())
 		return (-1);
 
-	const mesh_t	cubeMesh = loadCubeMesh();
+	// --- Load Meshes ---
+	mesh_t	meshes[1];
 
+	meshes[0] = loadCubeMesh();
+
+	debug(SUCCESS, "Meshes loaded successfully!");
+
+	// --- Main Loop ---
 	while (!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT);

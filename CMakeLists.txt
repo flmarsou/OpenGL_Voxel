@@ -8,6 +8,7 @@ add_subdirectory(libraries/GLFW)
 add_executable(${CMAKE_PROJECT_NAME}
 	libraries/GLAD/glad.c
 	src/main.cpp
+	src/loadMeshes.cpp
 )
 
 # Header Files

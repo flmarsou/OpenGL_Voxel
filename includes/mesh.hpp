@@ -2,11 +2,6 @@
 
 # include "types.hpp"
 
-enum	mesh_e
-{
-	CUBE
-};
-
 struct	mesh_t
 {
 	u32	VAO = 0;
@@ -14,3 +9,5 @@ struct	mesh_t
 	u32	EBO = 0;
 	u32	indexCount = 0;
 };
+
+mesh_t	loadCubeMesh();
