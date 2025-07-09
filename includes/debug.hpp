@@ -18,7 +18,7 @@ enum	debugType_e
 	ERROR,
 };
 
-inline void	debug(debugType_e type, const std::string &message)
+inline void	debug(debugType_e type)
 {
 	std::time_t	time = std::time(nullptr);
 	std::tm		*localTime = std::localtime(&time);
@@ -32,5 +32,5 @@ inline void	debug(debugType_e type, const std::string &message)
 		default: break ;
 	}
 
-	std::cout << "[" << std::put_time(localTime, "%H:%M:%S") << "] " << message << RESET << std::endl;
+	std::cout << "[" << std::put_time(localTime, "%H:%M:%S") << "] " << RESET;
 }
