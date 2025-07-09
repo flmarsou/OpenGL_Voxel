@@ -3,6 +3,8 @@
 #include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
 
+#include "load.cpp"
+
 bool	initGLFW(GLFWwindow	*&window)
 {
 	// GLFW: Initializes and configures
@@ -51,6 +53,8 @@ i32	main()
 
 	if (!initGLFW(window) || !initGLAD())
 		return (-1);
+
+	const mesh_t	cubeMesh = loadCubeMesh();
 
 	while (!glfwWindowShouldClose(window))
 	{
