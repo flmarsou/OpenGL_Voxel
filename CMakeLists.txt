@@ -8,7 +8,10 @@ add_subdirectory(libraries/GLFW)
 add_executable(${CMAKE_PROJECT_NAME}
 	libraries/GLAD/glad.c
 	src/main.cpp
-	src/loadMeshes.cpp
+	src/onLoad/initGLFW.cpp
+	src/onLoad/initGLAD.cpp
+	src/onLoad/loadVoxelShader.cpp
+	src/onLoad/loadMeshes.cpp
 )
 
 # Header Files
