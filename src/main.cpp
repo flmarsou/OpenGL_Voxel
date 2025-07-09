@@ -1,41 +1,46 @@
 #include "types.hpp"
-#include <glad/glad.h>
+#include "debug.hpp"
+#include <GLAD/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
-#include <ctime>
-#include <iomanip>
 
-void	debug(const std::string message)
-{
-	std::time_t	time = std::time(nullptr);
-	std::tm		*localTime = std::localtime(&time);
-
-	std::cout << "[" << std::put_time(localTime, "%H:%M:%S") << "] " << message << std::endl;
-}
-
-bool	initGLFW(GLFWwindow	*window)
+bool	initGLFW(GLFWwindow	*&window)
 {
 	// GLFW: Initializes and configures
 	if (!glfwInit())
 	{
-		debug("Failed to initialize GLFW");
+		debug("Failed to initialize GLFW!", ERROR);
 		return (false);
 	}
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	debug("GLFW initialized successfully", SUCCESS);
 
 	// GLFW: Window creation
 	window = glfwCreateWindow(1024, 768, "Voxel Game", NULL, NULL);
 	if (!window)
 	{
-		debug("Failed to create the window");
+		debug("Failed to create the window!", ERROR);
 		glfwTerminate();
 		return (false);
 	}
 	glfwMakeContextCurrent(window);
 
-	debug("Window created successfully");
+	debug("Window created successfully!", SUCCESS);
+
+	return (true);
+}
+
+bool	initGLAD()
+{
+	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	{
+		debug("Failed to initialize GLAD!", ERROR);
+		glfwTerminate();
+		return (false);
+	}
+
+	debug("GLAD initialized successfully", SUCCESS);
 
 	return (true);
 }
@@ -44,8 +49,19 @@ i32	main()
 {
 	GLFWwindow	*window;
 
-	if (!initGLFW(window))
+	if (!initGLFW(window) || !initGLAD())
 		return (-1);
+
+	while (!glfwWindowShouldClose(window))
+	{
+		glClear(GL_COLOR_BUFFER_BIT);
+		glClearColor(0.2f, 0.2f, 0.4f, 1.0f);
+
+		glfwSwapBuffers(window);
+		glfwPollEvents();
+	}
+
+	glfwTerminate();
 
 	return (0);
 }
