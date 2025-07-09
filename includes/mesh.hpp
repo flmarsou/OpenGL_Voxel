@@ -2,6 +2,11 @@
 
 # include "types.hpp"
 
+enum	mesh_e
+{
+	CUBE,
+};
+
 struct	mesh_t
 {
 	u32	VAO = 0;

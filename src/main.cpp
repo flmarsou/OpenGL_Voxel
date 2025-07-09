@@ -49,15 +49,17 @@ static bool	initGLAD()
 i32	main()
 {
 	GLFWwindow	*window;
+	u32			shaders[1];
+	mesh_t		meshes[1];
 
 	// --- Init Libraries ---
 	if (!initGLFW(window) || !initGLAD())
 		return (-1);
 
-	// --- Load Meshes ---
-	mesh_t	meshes[1];
+	// --- Init Shaders ---
 
-	meshes[0] = loadCubeMesh();
+	// --- Load Meshes ---
+	meshes[CUBE] = loadCubeMesh();
 
 	debug(SUCCESS, "Meshes loaded successfully!");
 
