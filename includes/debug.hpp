@@ -18,7 +18,7 @@ enum	debugType_e
 	ERROR,
 };
 
-void	debug(const std::string message, debugType_e type)
+inline void	debug(debugType_e type, const std::string &message)
 {
 	std::time_t	time = std::time(nullptr);
 	std::tm		*localTime = std::localtime(&time);
