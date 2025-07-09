@@ -1,8 +1,4 @@
-#include "types.hpp"
-#include "mesh.hpp"
-#include "debug.hpp"
-
-#include <GLAD/glad.h>
+#include "onLoad.hpp"
 
 mesh_t	loadCubeMesh()
 {
@@ -74,7 +70,8 @@ mesh_t	loadCubeMesh()
 
 	mesh.indexCount = sizeof(indices) / sizeof(u32);
 
-	debug(INFO, "Created cube mesh (VAO, VBO, and EBO)!");
+	debug(INFO);
+	std::cout << "Created cube mesh (VAO, VBO, and EBO)" << std::endl;
 
 	return (mesh);
 }
