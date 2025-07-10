@@ -16,7 +16,7 @@ bool	initGLFW(GLFWwindow	*&window)
 	std::cout << "GLFW initialized successfully" << std::endl;
 
 	// GLFW: Window creation
-	window = glfwCreateWindow(1024, 768, "Voxel Game", NULL, NULL);
+	window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
 	if (!window)
 	{
 		debug(ERROR);

@@ -3,6 +3,7 @@
 # include "types.hpp"
 # include "mesh.hpp"
 # include "debug.hpp"
+# include "options.hpp"
 # include <GLAD/glad.h>
 # include <GLFW/glfw3.h>
 
