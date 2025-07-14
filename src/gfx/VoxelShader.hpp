@@ -14,7 +14,9 @@ class	VoxelShader
 {
 	public:
 		bool	Init(const i8 *vertexFile, const i8 *fragmentFile);
+
 		void	Use() const;
+
 		void	Cleanup();
 
 		u32		program;

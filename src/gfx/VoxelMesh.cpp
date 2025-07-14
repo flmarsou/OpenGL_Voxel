@@ -7,24 +7,51 @@
 void	VoxelMesh::Init()
 {
 	const float	vertices[] = {
-		//  x  y  z
-			0, 0, 0,	// 0
-			1, 0, 0,	// 1
-			1, 1, 0,	// 2
-			0, 1, 0,	// 3
-			0, 0, 1,	// 4
-			1, 0, 1,	// 5
-			1, 1, 1,	// 6
-			0, 1, 1		// 7
-		};
+	//  x, y, z, u, v
+	// Right Face (x+)
+		1, 0, 0, 0, 0,
+		1, 1, 0, 0, 1,
+		1, 1, 1, 1, 1,
+		1, 0, 1, 1, 0,
+
+	// Left Face (x-)
+		0, 0, 1, 0, 0,
+		0, 1, 1, 0, 1,
+		0, 1, 0, 1, 1,
+		0, 0, 0, 1, 0,
+
+	// Top Face (y+)
+		0, 1, 0, 0, 0,
+		0, 1, 1, 0, 1,
+		1, 1, 1, 1, 1,
+		1, 1, 0, 1, 0,
+
+	// Bottom Face (y-)
+		0, 0, 1, 0, 0,
+		0, 0, 0, 0, 1,
+		1, 0, 0, 1, 1,
+		1, 0, 1, 1, 0,
+
+	// Back Face (z+)
+		0, 0, 1, 0, 0,
+		1, 0, 1, 1, 0,
+		1, 1, 1, 1, 1,
+		0, 1, 1, 0, 1,
+
+	// Front Face (z-)
+		1, 0, 0, 0, 0,
+		0, 0, 0, 1, 0,
+		0, 1, 0, 1, 1,
+		1, 1, 0, 0, 1
+	};
 
 	const u32	indices[] = {
-		1, 5, 6, 6, 2, 1,	// Right  x+
-		0, 4, 7, 7, 3, 0,	// Left   x-
-		3, 2, 6, 6, 7, 3,	// Top    y+
-		0, 1, 5, 5, 4, 0,	// Bottom y-
-		0, 1, 2, 2, 3, 0,	// Back   z+
-		4, 5, 6, 6, 7, 4	// Front  z-
+		0, 1, 2, 2, 3, 0,		// Right  (x+)
+		4, 5, 6, 6, 7, 4,		// Left   (x-)
+		8, 9, 10, 10, 11, 8,	// Top    (y+)
+		12, 13, 14, 14, 15, 12,	// Bottom (y-)
+		16, 17, 18, 18, 19, 16,	// Back   (z+)
+		20, 21, 22, 22, 23, 20	// Front  (z-)
 	};
 
 	// VAO (Vertex Array Object)
@@ -41,16 +68,27 @@ void	VoxelMesh::Init()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_ebo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-	// Vertex Attribute: Position
+	// Vertex Attribute: Position (location = 0)
 	glVertexAttribPointer(
-		0,					// Index
-		3,					// Size
-		GL_FLOAT,			// Type
-		GL_FALSE,			// Normalized?
-		3 * sizeof(float),	// Stride
-		(void *)0			// Pointer
+		0,					// Attribute Index
+		3,					// Size (x, y, z)
+		GL_FLOAT,
+		GL_FALSE,
+		5 * sizeof(float),
+		(void *)0			// Offset
 	);
 	glEnableVertexAttribArray(0);
+
+	// Vertex Attribute: Texture UV (location = 1)
+	glVertexAttribPointer(
+		1,							// Attribute Index
+		2,							// Size (u, v)
+		GL_FLOAT,
+		GL_FALSE,
+		5 * sizeof(float),
+		(void *)(3 * sizeof(float))	// Offset
+	);
+	glEnableVertexAttribArray(1);
 
 	std::cout << INFO "VoxelMesh's VAO, VBO, EBO created" RESET << std::endl;
 }
