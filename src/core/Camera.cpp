@@ -1,5 +1,9 @@
 #include "Camera.hpp"
 
+// ========================================================================== //
+//    Init                                                                    //
+// ========================================================================== //
+
 void	Camera::Init(const u32 width, const u32 height, const glm::vec3 pos)
 {
 	this->width = width;
@@ -24,6 +28,10 @@ void	Camera::Matrix(float nearPlane, float farPlane, u32 shader, const char *uni
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, uniform), 1, GL_FALSE, glm::value_ptr(proj * view));
 }
+
+// ========================================================================== //
+//    Input                                                                   //
+// ========================================================================== //
 
 void	Camera::Input(GLFWwindow *window)
 {

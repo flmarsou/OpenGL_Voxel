@@ -1,5 +1,9 @@
 #include "Texture.hpp"
 
+// ========================================================================== //
+//    Load                                                                    //
+// ========================================================================== //
+
 void	Texture::Load(const i8 *imagePath, TextureID textureID)
 {
 	i32	imageWidth;
@@ -10,7 +14,7 @@ void	Texture::Load(const i8 *imagePath, TextureID textureID)
 	if (!bytes)
 		throw std::runtime_error(std::string("Failed to load texture: ") + imagePath);
 
-	glGenTextures(1, &_textureID[textureID]);
+	glGenTextures(1, &this->_textureID[textureID]);
 	glBindTexture(GL_TEXTURE_2D, textureID);
 
 	// Texture Parameters
@@ -20,7 +24,7 @@ void	Texture::Load(const i8 *imagePath, TextureID textureID)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
-	//
+	// Upload texture data to GPU
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, bytes);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -28,6 +32,10 @@ void	Texture::Load(const i8 *imagePath, TextureID textureID)
 
 	std::cout << SUCCESS "Loaded texture: " << imagePath << std::endl;
 }
+
+// ========================================================================== //
+//    Methods                                                                 //
+// ========================================================================== //
 
 void	Texture::Bind(TextureID textureID)
 {
@@ -42,6 +50,6 @@ void	Texture::Unbind()
 void	Texture::Cleanup()
 {
 	for (i32 i = 0; i < TEXTURE_COUNT; i++)
-		glDeleteTextures(1, &_textureID[i]);
+		glDeleteTextures(1, &this->_textureID[i]);
 	std::cout << INFO "Textures deleted" << std::endl;
 }
