@@ -16,6 +16,9 @@
 # define VOXEL_VERTEX_PATH		"../shaders/voxelVertex.glsl"
 # define VOXEL_FRAGMENT_PATH	"../shaders/voxelFragment.glsl"
 
+// --- Textures ---
+# define DIRT_BLOCK_PATH	"../assets/dirt_block.png"
+
 // --- Camera Settings ---
 # define CAMERA_SPEED			0.5f
 # define CAMERA_SENSITIVITY		0.1f
@@ -24,6 +27,3 @@
 // --- World ---
 # define CHUNK_WIDTH	32
 # define CHUNK_HEIGHT	32
-
-// --- Textures ---
-# define DIRT_BLOCK_PATH	"../assets/dirt_block.png"

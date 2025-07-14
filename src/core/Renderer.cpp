@@ -17,14 +17,15 @@ void	Renderer::Init()
 	this->_voxelShader.Init(VOXEL_VERTEX_PATH, VOXEL_FRAGMENT_PATH);
 	this->_voxelShader.Use();
 
+	// --- Textures ---
+	stbi_set_flip_vertically_on_load(true);
+	this->_texture.Load(DIRT_BLOCK_PATH, DIRT_BLOCK);
+
 	// --- Camera ---
 	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16, 16, 100));
 
 	// --- Chunks ---
 	this->_chunks.push_back(new Chunk(0, 0, 0));
-
-	// --- Textures ---
-	this->_texture.Load(DIRT_BLOCK_PATH, DIRT_BLOCK);
 }
 
 // ========================================================================== //

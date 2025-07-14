@@ -13,10 +13,10 @@ add_executable(${CMAKE_PROJECT_NAME}
 
 	src/core/Window.cpp
 	src/core/Renderer.cpp
+	src/core/Camera.cpp
 
 	src/gfx/VoxelMesh.cpp
 	src/gfx/VoxelShader.cpp
-	src/gfx/Camera.cpp
 	src/gfx/Texture.cpp
 
 	src/world/Chunk.cpp

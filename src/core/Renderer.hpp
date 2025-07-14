@@ -25,9 +25,9 @@ class	Renderer
 	private:
 		VoxelMesh				_voxelMesh;
 		VoxelShader				_voxelShader;
+		Texture					_texture;
 		Camera					_camera;
 		std::vector<Chunk *>	_chunks;
-		Texture					_texture;
 
 		u32	_triangleCount;
 		u32	_vertexCount;
