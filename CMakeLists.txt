@@ -7,6 +7,7 @@ add_subdirectory(libraries/GLFW)
 # C/C++ Files
 add_executable(${CMAKE_PROJECT_NAME}
 	libraries/GLAD/glad.c
+	libraries/STB/stb_init.c
 
 	src/main.cpp
 
@@ -16,9 +17,10 @@ add_executable(${CMAKE_PROJECT_NAME}
 	src/gfx/VoxelMesh.cpp
 	src/gfx/VoxelShader.cpp
 	src/gfx/Camera.cpp
+	src/gfx/Texture.cpp
 
 	src/world/Chunk.cpp
-	)
+)
 
 # Header Files
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
