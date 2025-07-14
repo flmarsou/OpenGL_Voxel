@@ -3,27 +3,43 @@
 // ========================================================================== //
 //    Init                                                                    //
 // ========================================================================== //
+u32	texture;
 
 void	Renderer::Init()
 {
+	glEnable(GL_CULL_FACE);
+
+	// --- Voxel ---
 	this->_voxelMesh.Init();
+	this->_voxelMesh.Bind();
+
+	// --- Shaders ---
 	this->_voxelShader.Init(VOXEL_VERTEX_PATH, VOXEL_FRAGMENT_PATH);
+	this->_voxelShader.Use();
+
+	// --- Camera ---
 	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16, 16, 100));
 
+	// --- Chunks ---
 	this->_chunks.push_back(new Chunk(0, 0, 0));
+
+	// --- Textures ---
+	this->_texture.Load(DIRT_BLOCK_PATH, DIRT_BLOCK);
 }
+
+// ========================================================================== //
+//    Render Loop                                                             //
+// ========================================================================== //
 
 void	Renderer::Render(GLFWwindow *win)
 {
 	this->_triangleCount = 0;
 	this->_vertexCount = 0;
 
-	this->_voxelShader.Use();
-
 	this->_camera.Input(win);
 	this->_camera.Matrix(0.1f, 500.0f, this->_voxelShader.program, "uCamera");
 
-	this->_voxelMesh.Bind();
+	this->_texture.Bind(DIRT_BLOCK);
 
 	for (i32 chunkCount = 0; chunkCount < this->_chunks.size(); chunkCount++)
 	{
@@ -39,7 +55,7 @@ void	Renderer::Render(GLFWwindow *win)
 				{
 					// Skip rendering if block is hidden
 					// Reduce ~85% of total triangles
-					// 393216 to 58416
+					// 393216 to 69216
 					if (this->_chunks[chunkCount]->IsSurrounded(x, y, z))
 						continue ;
 
@@ -56,7 +72,7 @@ void	Renderer::Render(GLFWwindow *win)
 
 					// Skip render if face is hidden
 					// Reduce ~97% of total triangles
-					// 58416 to 10494
+					// 69216 to 12294
 					for (i8 face = 0; face < 6; face++)
 					{
 						if (!this->_chunks[chunkCount]->IsFaceVisible(x, y, z, face))
@@ -72,6 +88,10 @@ void	Renderer::Render(GLFWwindow *win)
 	}
 }
 
+// ========================================================================== //
+//    Methods                                                                 //
+// ========================================================================== //
+
 void	Renderer::PrintStatistics()
 {
 	std::cout << INFO "Triangles: " << this->_triangleCount << std::endl;
@@ -85,6 +105,7 @@ void	Renderer::Cleanup()
 {
 	this->_voxelShader.Cleanup();
 	this->_voxelMesh.Cleanup();
+	this->_texture.Cleanup();
 
 	for (i32 chunkCount = 0; chunkCount < this->_chunks.size(); chunkCount++)
 		delete this->_chunks[chunkCount];

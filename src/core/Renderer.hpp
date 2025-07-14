@@ -7,6 +7,7 @@
 # include "VoxelShader.hpp"
 # include "Camera.hpp"
 # include "Chunk.hpp"
+# include "Texture.hpp"
 
 # include <iostream>
 # include <vector>
@@ -17,8 +18,8 @@ class	Renderer
 		void	Init();
 
 		void	Render(GLFWwindow *win);
-
 		void	PrintStatistics();
+
 		void	Cleanup();
 
 	private:
@@ -26,6 +27,7 @@ class	Renderer
 		VoxelShader				_voxelShader;
 		Camera					_camera;
 		std::vector<Chunk *>	_chunks;
+		Texture					_texture;
 
 		u32	_triangleCount;
 		u32	_vertexCount;
