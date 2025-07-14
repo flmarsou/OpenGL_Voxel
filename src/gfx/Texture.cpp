@@ -26,7 +26,7 @@ void	Texture::Load(const i8 *imagePath, TextureID textureID)
 
 	stbi_image_free(bytes);
 
-	std::cout << INFO "Loaded texture: " << imagePath << std::endl;
+	std::cout << SUCCESS "Loaded texture: " << imagePath << std::endl;
 }
 
 void	Texture::Bind(TextureID textureID)

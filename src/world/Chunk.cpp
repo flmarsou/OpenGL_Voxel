@@ -11,7 +11,7 @@ Chunk::Chunk(const i32 x, const i32 y, const i32 z)
 		"X: " << _chunkX <<
 		"Y: " << _chunkY <<
 		"Z: " << _chunkZ <<
-		" loaded!" << std::endl;
+		" loaded" << std::endl;
 
 	Init();
 }
@@ -22,7 +22,7 @@ Chunk::~Chunk()
 		"X: " << _chunkX <<
 		"Y: " << _chunkY <<
 		"Z: " << _chunkZ <<
-		" unloaded!" RESET << std::endl;
+		" unloaded" RESET << std::endl;
 }
 
 // ========================================================================== //
