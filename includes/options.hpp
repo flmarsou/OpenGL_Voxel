@@ -24,3 +24,6 @@
 // --- World ---
 # define CHUNK_WIDTH	32
 # define CHUNK_HEIGHT	32
+
+// --- Textures ---
+# define DIRT_BLOCK_PATH	"../assets/dirt_block.png"
