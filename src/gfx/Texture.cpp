@@ -7,6 +7,8 @@ void	Texture::Load(const i8 *imagePath, TextureID textureID)
 	i32	imageChannel;
 
 	u8	*bytes = stbi_load(imagePath, &imageWidth, &imageHeight, &imageChannel, 4);
+	if (!bytes)
+		throw std::runtime_error(std::string("Failed to load texture: ") + imagePath);
 
 	glGenTextures(1, &_textureID[textureID]);
 	glBindTexture(GL_TEXTURE_2D, textureID);
@@ -23,6 +25,8 @@ void	Texture::Load(const i8 *imagePath, TextureID textureID)
 	glGenerateMipmap(GL_TEXTURE_2D);
 
 	stbi_image_free(bytes);
+
+	std::cout << INFO "Loaded texture: " << imagePath << std::endl;
 }
 
 void	Texture::Bind(TextureID textureID)
@@ -39,4 +43,5 @@ void	Texture::Cleanup()
 {
 	for (i32 i = 0; i < TEXTURE_COUNT; i++)
 		glDeleteTextures(1, &_textureID[i]);
+	std::cout << INFO "Textures deleted" << std::endl;
 }
