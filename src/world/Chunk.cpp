@@ -69,7 +69,7 @@ bool Chunk::IsSurrounded(u8 x, u8 y, u8 z) const
 {
 	// Check boundaries
 	if (x == 0 || x == CHUNK_WIDTH - 1
-		|| y == 0 || x == CHUNK_HEIGHT - 1
+		|| y == 0 || y == CHUNK_HEIGHT - 1
 		|| z == 0 || z == CHUNK_WIDTH - 1)
 		return (false);
 
