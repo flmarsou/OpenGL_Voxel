@@ -13,20 +13,20 @@ void	Camera::Init(const u32 width, const u32 height, const glm::vec3 pos)
 
 void	Camera::Matrix(float nearPlane, float farPlane, u32 shader, const char *uniform)
 {
-	glm::mat4	view = glm::lookAt(
+	this->View = glm::lookAt(
 		this->Position,
 		this->Position + this->Direction,
 		this->Angle
 	);
 
-	glm::mat4	proj = glm::perspective(
+	this->Proj = glm::perspective(
 		glm::radians(CAMERA_FOV),
 		this->width / this->height,
 		nearPlane,
 		farPlane
 	);
 
-	glUniformMatrix4fv(glGetUniformLocation(shader, uniform), 1, GL_FALSE, glm::value_ptr(proj * view));
+	glUniformMatrix4fv(glGetUniformLocation(shader, uniform), 1, GL_FALSE, glm::value_ptr(this->Proj * this->View));
 }
 
 // ========================================================================== //
