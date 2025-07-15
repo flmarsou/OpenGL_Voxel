@@ -19,6 +19,7 @@ void	Renderer::Init()
 
 	// --- Textures ---
 	stbi_set_flip_vertically_on_load(true);
+	this->_texture.Load(DEBUG_BLOCK_PATH, DEBUG_BLOCK);
 	this->_texture.Load(DIRT_BLOCK_PATH, DIRT_BLOCK);
 
 	// --- Camera ---
@@ -39,8 +40,6 @@ void	Renderer::Render(GLFWwindow *win)
 
 	this->_camera.Input(win);
 	this->_camera.Matrix(0.1f, 500.0f, this->_voxelShader.program, "uCamera");
-
-	this->_texture.Bind(DIRT_BLOCK);
 
 	for (i32 chunkCount = 0; chunkCount < this->_chunks.size(); chunkCount++)
 	{
@@ -65,7 +64,14 @@ void	Renderer::Render(GLFWwindow *win)
 					u8	vx;
 					u8	vy;
 					u8	vz;
-					Voxel::Unpack(voxel, vx, vy, vz);
+					u32	blockID;
+					Voxel::Unpack(voxel, vx, vy, vz, blockID);
+
+					switch (blockID)
+					{
+						case (DIRT_BLOCK): this->_texture.Bind(DIRT_BLOCK); break ;
+						default: this->_texture.Bind(DEBUG_BLOCK); break ;
+					}
 
 					glm::mat4	model = glm::translate(glm::mat4(1.0f), glm::vec3(baseX + vx, baseY + vy, baseZ + vz));
 
