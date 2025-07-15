@@ -34,7 +34,10 @@ void Chunk::Init()
 	for (u8 x = 0; x < CHUNK_WIDTH; x++)
 		for (u8 y = 0; y < CHUNK_HEIGHT; y++)
 			for (u8 z = 0; z < CHUNK_WIDTH; z++)
-				this->_voxels[VOXEL_INDEX(x, y, z)] = Voxel::Pack(x, y, z, DIRT_BLOCK);
+				if (y == CHUNK_HEIGHT - 1 && x == CHUNK_WIDTH / 2 && z == CHUNK_WIDTH / 2)
+					this->_voxels[VOXEL_INDEX(x, y, z)] = Voxel::Pack(x, y, z, DEBUG_BLOCK);
+				else
+					this->_voxels[VOXEL_INDEX(x, y, z)] = Voxel::Pack(x, y, z, DIRT_BLOCK);
 }
 
 

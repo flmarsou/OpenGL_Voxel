@@ -25,8 +25,8 @@ void	Renderer::Init()
 	// --- Camera ---
 	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16, 16, 100));
 
-	// --- Chunks ---
-	this->_chunks.push_back(new Chunk(0, 0, 0));
+	// --- World ---
+	this->world.load(0, 0);
 }
 
 // ========================================================================== //
@@ -41,11 +41,11 @@ void	Renderer::Render(GLFWwindow *win)
 	this->_camera.Input(win);
 	this->_camera.Matrix(0.1f, 500.0f, this->_voxelShader.program, "uCamera");
 
-	for (i32 chunkCount = 0; chunkCount < this->_chunks.size(); chunkCount++)
+	for (i32 chunkCount = 0; chunkCount < world.chunks.size(); chunkCount++)
 	{
-		i32	baseX = this->_chunks[chunkCount]->GetChunkX() * CHUNK_WIDTH;
-		i32	baseY = this->_chunks[chunkCount]->GetChunkY() * CHUNK_HEIGHT;
-		i32	baseZ = this->_chunks[chunkCount]->GetChunkZ() * CHUNK_WIDTH;
+		i32	baseX = world.chunks[chunkCount]->GetChunkX() * CHUNK_WIDTH;
+		i32	baseY = world.chunks[chunkCount]->GetChunkY() * CHUNK_HEIGHT;
+		i32	baseZ = world.chunks[chunkCount]->GetChunkZ() * CHUNK_WIDTH;
 
 		for (i32 x = 0; x < CHUNK_WIDTH; x++)
 		{
@@ -56,10 +56,10 @@ void	Renderer::Render(GLFWwindow *win)
 					// Skip rendering if block is hidden
 					// Reduce ~85% of total triangles
 					// 393216 to 69216
-					if (this->_chunks[chunkCount]->IsSurrounded(x, y, z))
+					if (world.chunks[chunkCount]->IsSurrounded(x, y, z))
 						continue ;
 
-					u32	voxel = this->_chunks[chunkCount]->GetVoxel(x, y, z);
+					u32	voxel = world.chunks[chunkCount]->GetVoxel(x, y, z);
 
 					u8	vx;
 					u8	vy;
@@ -82,7 +82,7 @@ void	Renderer::Render(GLFWwindow *win)
 					// 69216 to 12294
 					for (i8 face = 0; face < 6; face++)
 					{
-						if (!this->_chunks[chunkCount]->IsFaceVisible(x, y, z, face))
+						if (!world.chunks[chunkCount]->IsFaceVisible(x, y, z, face))
 							continue ;
 
 						glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(face * 6 * sizeof(u32)));
@@ -114,6 +114,6 @@ void	Renderer::Cleanup()
 	this->_voxelMesh.Cleanup();
 	this->_texture.Cleanup();
 
-	for (i32 chunkCount = 0; chunkCount < this->_chunks.size(); chunkCount++)
-		delete this->_chunks[chunkCount];
+	for (i32 i = 0; i < this->world.chunks.size(); i++)
+		delete this->world.chunks[i];
 }

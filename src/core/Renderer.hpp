@@ -6,8 +6,8 @@
 # include "VoxelMesh.hpp"
 # include "VoxelShader.hpp"
 # include "Camera.hpp"
-# include "Chunk.hpp"
 # include "Texture.hpp"
+# include "World.hpp"
 
 # include <iostream>
 # include <vector>
@@ -27,7 +27,7 @@ class	Renderer
 		VoxelShader				_voxelShader;
 		Texture					_texture;
 		Camera					_camera;
-		std::vector<Chunk *>	_chunks;
+		World					world;
 
 		u32	_triangleCount;
 		u32	_vertexCount;
