@@ -35,5 +35,6 @@ enum	TextureID
 # define CAMERA_FOV				45.0f
 
 // --- World ---
-# define CHUNK_WIDTH	32
-# define CHUNK_HEIGHT	32
+# define RENDER_DISTANCE	10
+# define CHUNK_WIDTH		32
+# define CHUNK_HEIGHT		32

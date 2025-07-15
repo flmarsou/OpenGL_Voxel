@@ -1,6 +1,7 @@
 #include "options.hpp"
 #include "Window.hpp"
 #include "Renderer.hpp"
+#include "World.hpp"
 
 i32	main()
 {
@@ -27,7 +28,7 @@ i32	main()
 		window.SwapBuffers();
 		window.PollEvents();
 
-		// renderer.PrintStatistics();
+		renderer.PrintStatistics();
 	}
 
 	renderer.Cleanup();

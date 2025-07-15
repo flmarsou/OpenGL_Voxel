@@ -20,6 +20,7 @@ add_executable(${CMAKE_PROJECT_NAME}
 	src/gfx/Texture.cpp
 
 	src/world/Chunk.cpp
+	src/world/World.cpp
 )
 
 # Header Files
