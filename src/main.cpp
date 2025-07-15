@@ -30,8 +30,8 @@ i32	main()
 		// renderer.PrintStatistics();
 	}
 
-	window.Cleanup();
 	renderer.Cleanup();
+	window.Cleanup();
 
 	return (0);
 }
