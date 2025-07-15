@@ -7,12 +7,6 @@
 # include <STB/stb_image.h>
 # include <iostream>
 
-enum	TextureID
-{
-	DIRT_BLOCK,
-	TEXTURE_COUNT
-};
-
 class	Texture
 {
 	public:

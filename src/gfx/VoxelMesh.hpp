@@ -9,17 +9,18 @@
 
 struct	Voxel
 {
-	// [- - - - - - - - - - - - - - - - - z z z z z y y y y y x x x x x]
-	static u32	Pack(u8 x, u8 y, u8 z)
+	// [- - - - - - - b b b b b b b b b b z z z z z y y y y y x x x x x]
+	static u32	Pack(u8 x, u8 y, u8 z, u32 blockID)
 	{
-		return ((z & 0x1F) << 10 | (y & 0x1F) << 5 | (x & 0x1F));
+		return ((blockID & 0x3FF) << 15 | (z & 0x1F) << 10 | (y & 0x1F) << 5 | (x & 0x1F));
 	}
 
-	static void	Unpack(u32 data, u8 &x, u8 &y, u8 &z)
+	static void	Unpack(u32 data, u8 &x, u8 &y, u8 &z, u32 &blockID)
 	{
 		x = (data) & 0x1F;
 		y = (data >> 5) & 0x1F;
 		z = (data >> 10) & 0x1F;
+		blockID = (data >> 15) & 0x3FF;
 	}
 };
 
