@@ -17,7 +17,17 @@
 # define VOXEL_FRAGMENT_PATH	"../shaders/voxelFragment.glsl"
 
 // --- Textures ---
+# define DEBUG_BLOCK_PATH	"../assets/debug_block.png"
 # define DIRT_BLOCK_PATH	"../assets/dirt_block.png"
+
+// --- Texture Enum ---
+enum	TextureID
+{
+	DEBUG_BLOCK,
+	AIR_BLOCK,
+	DIRT_BLOCK,
+	TEXTURE_COUNT
+};
 
 // --- Camera Settings ---
 # define CAMERA_SPEED			0.5f
