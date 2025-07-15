@@ -21,7 +21,7 @@ class	Chunk
 		i32		GetChunkZ() const;
 
 		bool	IsSurrounded(u8 x, u8 y, u8 z) const;
-		bool	IsFaceVisible(u8 x, u8 y, u8 z, u8 dir) const;
+		bool	IsFaceVisible(i8 x, i8 y, i8 z, u8 dir) const;
 
 	private:
 		const i32	_chunkX;

@@ -29,13 +29,14 @@ Chunk::~Chunk()
 //    Init                                                                    //
 // ========================================================================== //
 
-void	Chunk::Init()
+void Chunk::Init()
 {
 	for (u8 x = 0; x < CHUNK_WIDTH; x++)
 		for (u8 y = 0; y < CHUNK_HEIGHT; y++)
 			for (u8 z = 0; z < CHUNK_WIDTH; z++)
-				this->_voxels[VOXEL_INDEX(x, y, z)] = Voxel::Pack(x, y, z);
+				this->_voxels[VOXEL_INDEX(x, y, z)] = Voxel::Pack(x, y, z, DIRT_BLOCK);
 }
+
 
 // ========================================================================== //
 //    Getters                                                                 //
@@ -83,29 +84,25 @@ bool Chunk::IsSurrounded(u8 x, u8 y, u8 z) const
 	);
 }
 
-bool	Chunk::IsFaceVisible(u8 x, u8 y, u8 z, u8 dir) const
+bool	Chunk::IsFaceVisible(i8 x, i8 y, i8 z, u8 dir) const
 {
-	i8	nx = x;
-	i8	ny = y;
-	i8	nz = z;
-
 	// Get neighbor coordinates
 	switch (dir)
 	{
-		case (0): nx++; break ;
-		case (1): nx--; break ;
-		case (2): ny++; break ;
-		case (3): ny--; break ;
-		case (4): nz++; break ;
-		case (5): nz--; break ;
+		case (0): x++; break ;
+		case (1): x--; break ;
+		case (2): y++; break ;
+		case (3): y--; break ;
+		case (4): z++; break ;
+		case (5): z--; break ;
 	}
 
 	// Check boundaries
-	if (nx < 0 || nx >= CHUNK_WIDTH
-		|| ny < 0 || ny >= CHUNK_HEIGHT
-		|| nz < 0 || nz >= CHUNK_WIDTH)
+	if (x < 0 || x >= CHUNK_WIDTH
+		|| y < 0 || y >= CHUNK_HEIGHT
+		|| z < 0 || z >= CHUNK_WIDTH)
 		return (true);
 
 	// Check neighbor
-	return (GetVoxel(nx, ny, nz) == 0);
+	return (GetVoxel(x, y, z) == 0);
 }
