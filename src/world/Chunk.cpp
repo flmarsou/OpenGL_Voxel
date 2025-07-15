@@ -9,8 +9,8 @@ Chunk::Chunk(const i32 x, const i32 y, const i32 z)
 {
 	std::cout << INFO "Chunk " <<
 		"X: " << _chunkX <<
-		"Y: " << _chunkY <<
-		"Z: " << _chunkZ <<
+		" | Y: " << _chunkY <<
+		" | Z: " << _chunkZ <<
 		" loaded" << std::endl;
 
 	Init();
@@ -20,8 +20,8 @@ Chunk::~Chunk()
 {
 	std::cout << INFO "Chunk " <<
 		"X: " << _chunkX <<
-		"Y: " << _chunkY <<
-		"Z: " << _chunkZ <<
+		" | Y: " << _chunkY <<
+		" | Z: " << _chunkZ <<
 		" unloaded" RESET << std::endl;
 }
 
@@ -92,12 +92,12 @@ bool	Chunk::IsFaceVisible(u8 x, u8 y, u8 z, u8 dir) const
 	// Get neighbor coordinates
 	switch (dir)
 	{
-		case (LEFT): nx--; break ;
-		case (RIGHT): nx++; break ;
-		case (BOTTOM): ny--; break ;
-		case (TOP): ny++; break ;
-		case (FRONT): nz--; break ;
-		case (BACK): nz++; break ;
+		case (0): nx++; break ;
+		case (1): nx--; break ;
+		case (2): ny++; break ;
+		case (3): ny--; break ;
+		case (4): nz++; break ;
+		case (5): nz--; break ;
 	}
 
 	// Check boundaries

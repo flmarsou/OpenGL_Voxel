@@ -7,17 +7,6 @@
 
 # define VOXEL_INDEX(x, y, z)	(x + CHUNK_WIDTH * (y + CHUNK_HEIGHT * z))
 
-// ! Do NOT shuffle, this follows indices order
-enum	FaceDirections
-{
-	RIGHT,
-	LEFT,
-	TOP,
-	BOTTOM,
-	BACK,
-	FRONT,
-};
-
 class	Chunk
 {
 	public:
