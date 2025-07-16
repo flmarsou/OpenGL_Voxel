@@ -4,12 +4,11 @@
 //    Constructors                                                            //
 // ========================================================================== //
 
-Chunk::Chunk(const i32 x, const i32 y, const i32 z)
-	:	_chunkX(x), _chunkY(y), _chunkZ(z)
+Chunk::Chunk(const i32 x, const i32 z)
+	:	_chunkX(x), _chunkZ(z)
 {
 	std::cout << INFO "Chunk " <<
 		"X: " << _chunkX <<
-		" | Y: " << _chunkY <<
 		" | Z: " << _chunkZ <<
 		" loaded" << std::endl;
 
@@ -20,7 +19,6 @@ Chunk::~Chunk()
 {
 	std::cout << INFO "Chunk " <<
 		"X: " << _chunkX <<
-		" | Y: " << _chunkY <<
 		" | Z: " << _chunkZ <<
 		" unloaded" RESET << std::endl;
 }
@@ -35,55 +33,73 @@ void Chunk::Init()
 		for (u8 y = 0; y < CHUNK_HEIGHT; y++)
 			for (u8 z = 0; z < CHUNK_WIDTH; z++)
 				if (y == CHUNK_HEIGHT - 1 && x == CHUNK_WIDTH / 2 && z == CHUNK_WIDTH / 2)
-					this->_voxels[VOXEL_INDEX(x, y, z)] = Voxel::Pack(x, y, z, DEBUG_BLOCK);
+					this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DEBUG_BLOCK);
 				else
-					this->_voxels[VOXEL_INDEX(x, y, z)] = Voxel::Pack(x, y, z, DIRT_BLOCK);
+					this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DIRT_BLOCK);
 }
 
 
 // ========================================================================== //
-//    Getters                                                                 //
+//    Setters & Getters                                                       //
 // ========================================================================== //
 
-u32	Chunk::GetVoxel(u8 x, u8 y, u8 z) const
-{
-	return (this->_voxels[VOXEL_INDEX(x, y, z)]);
-}
+u32	Chunk::GetVoxel(u8 x, u8 y, u8 z) const { return (this->_voxels[VOXEL_INDEX(x, y, z)]); }
 
-i32	Chunk::GetChunkX() const
-{
-	return (this->_chunkX);
-}
+i32	Chunk::GetChunkX() const { return (this->_chunkX); }
+i32	Chunk::GetChunkZ() const { return (this->_chunkZ); }
 
-i32	Chunk::GetChunkY() const
-{
-	return (this->_chunkY);
-}
+void	Chunk::SetNorthNeighbour(Chunk *chunk) { this->_northNeighbour = chunk; }
+void	Chunk::SetSouthNeighbour(Chunk *chunk) { this->_southNeighbour = chunk; }
+void	Chunk::SetEastNeighbour(Chunk *chunk) { this->_eastNeighbour = chunk; }
+void	Chunk::SetWestNeighbour(Chunk *chunk) { this->_westNeighbour = chunk; }
 
-i32	Chunk::GetChunkZ() const
-{
-	return (this->_chunkZ);
-}
+Chunk	*Chunk::GetNorthNeighbour() const { return (this->_northNeighbour); }
+Chunk	*Chunk::GetSouthNeighbour() const { return (this->_southNeighbour); }
+Chunk	*Chunk::GetEastNeighbour() const { return (this->_eastNeighbour); }
+Chunk	*Chunk::GetWestNeighbour() const { return (this->_westNeighbour); }
 
 // ========================================================================== //
 //    Methods                                                                 //
 // ========================================================================== //
 
+u32		Chunk::GetNeighborVoxel(i8 x, i8 y, i8 z) const
+{
+	// Inside current chunk
+	if (x >= 0 && x < CHUNK_WIDTH
+		&& y >= 0 && y < CHUNK_HEIGHT
+		&& z >= 0 && z < CHUNK_WIDTH)
+		return (GetVoxel(x, y, z));
+
+	// Outside current chunk
+	if (x < 0 && this->_westNeighbour)
+		return (this->_westNeighbour->GetNeighborVoxel(x + CHUNK_WIDTH, y, z));
+
+	if (x >= CHUNK_WIDTH && this->_eastNeighbour)
+		return (this->_eastNeighbour->GetNeighborVoxel(x - CHUNK_WIDTH, y, z));
+
+	if (z < 0 && this->_northNeighbour)
+		return (this->_northNeighbour->GetNeighborVoxel(x, y, z + CHUNK_WIDTH));
+
+	if (z >= CHUNK_WIDTH && this->_southNeighbour)
+		return (this->_southNeighbour->GetNeighborVoxel(x, y, z - CHUNK_WIDTH));
+
+	// Missing neighbor or vertical
+	return (0);
+}
+
 bool Chunk::IsSurrounded(u8 x, u8 y, u8 z) const
 {
-	// Check boundaries
-	if (x == 0 || x == CHUNK_WIDTH - 1
-		|| y == 0 || y == CHUNK_HEIGHT - 1
-		|| z == 0 || z == CHUNK_WIDTH - 1)
+	// Check top/bottom boundaries
+	if (y == 0 || y == CHUNK_HEIGHT - 1)
 		return (false);
 
 	// Check all six neighbors
-	return (GetVoxel(x - 1, y, z)	// Left
-		&& GetVoxel(x + 1, y, z)	// Right
-		&& GetVoxel(x, y - 1, z)	// Bottom
-		&& GetVoxel(x, y + 1, z)	// Top
-		&& GetVoxel(x, y, z - 1)	// Front
-		&& GetVoxel(x, y, z + 1)	// Back
+	return (GetNeighborVoxel(x - 1, y, z)	// Left
+		&& GetNeighborVoxel(x + 1, y, z)	// Right
+		&& GetNeighborVoxel(x, y - 1, z)	// Bottom
+		&& GetNeighborVoxel(x, y + 1, z)	// Top
+		&& GetNeighborVoxel(x, y, z - 1)	// Front
+		&& GetNeighborVoxel(x, y, z + 1)	// Back
 	);
 }
 
@@ -100,12 +116,6 @@ bool	Chunk::IsFaceVisible(i8 x, i8 y, i8 z, u8 dir) const
 		case (5): z--; break ;
 	}
 
-	// Check boundaries
-	if (x < 0 || x >= CHUNK_WIDTH
-		|| y < 0 || y >= CHUNK_HEIGHT
-		|| z < 0 || z >= CHUNK_WIDTH)
-		return (true);
-
 	// Check neighbor
-	return (GetVoxel(x, y, z) == 0);
+	return (GetNeighborVoxel(x, y, z) == 0);
 }
