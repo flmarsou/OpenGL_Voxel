@@ -1,26 +1,77 @@
 #include "World.hpp"
 
-static bool	isLoad(const int playerX, const int playerY, const int currentX, const int currentY, int radius)
-{
-	int	dx = currentX - playerX;
-	int	dy = currentY - playerY;
-	return (dx * dx + dy * dy <= radius * radius);
-}
+// ========================================================================== //
+//    Load                                                                    //
+// ========================================================================== //
 
-void	World::load(const int playerX, const int playerY)
+void	World::Load(const i32 playerX, const i32 playerZ)
 {
-	const int	radius = RENDER_DISTANCE / 2;
+	const i32	radius = RENDER_DISTANCE / 2;
 
-	for (int offsetY = -radius; offsetY <= radius; offsetY++)
+	for (i32 offsetZ = -radius; offsetZ <= radius; offsetZ++)
 	{
-		for (int offsetX = -radius; offsetX <= radius; offsetX++)
+		for (i32 offsetX = -radius; offsetX <= radius; offsetX++)
 		{
-			int	currentX = playerX + offsetX;
-			int	currentY = playerY + offsetY;
+			i32	currentX = playerX + offsetX;
+			i32	currentZ = playerZ + offsetZ;
 
-			if (!isLoad(playerX, playerY, currentX, currentY, radius))
+			if (!isLoad(playerX, playerZ, currentX, currentZ, radius))
 				continue ;
-			this->chunks.push_back(new Chunk(currentX, 0, currentY));
+
+			// Create chunk
+			u64	currentChunkKey = BitShiftChunk::Pack(currentX, currentZ);
+			this->chunks[currentChunkKey] = new Chunk(currentX, currentZ);
+
+			// Check and set neighboring chunks
+			Chunk	*currentChunk = this->chunks[currentChunkKey];
+
+			u64	northChunkKey = BitShiftChunk::Pack(currentX, currentZ - 1);
+			u64	southChunkKey = BitShiftChunk::Pack(currentX, currentZ + 1);
+			u64	eastChunkKey = BitShiftChunk::Pack(currentX + 1, currentZ);
+			u64	westChunkKey = BitShiftChunk::Pack(currentX - 1, currentZ);
+
+			if (this->chunks.find(northChunkKey) != this->chunks.end())
+			{
+				Chunk	*northChunk = this->chunks[northChunkKey];
+
+				currentChunk->SetNorthNeighbour(northChunk);
+				northChunk->SetSouthNeighbour(currentChunk);
+			}
+
+			if (this->chunks.find(southChunkKey) != this->chunks.end())
+			{
+				Chunk	*southChunk = this->chunks[southChunkKey];
+
+				currentChunk->SetSouthNeighbour(southChunk);
+				southChunk->SetNorthNeighbour(currentChunk);
+			}
+
+			if (this->chunks.find(eastChunkKey) != this->chunks.end())
+			{
+				Chunk	*eastChunk = this->chunks[eastChunkKey];
+
+				currentChunk->SetEastNeighbour(eastChunk);
+				eastChunk->SetWestNeighbour(currentChunk);
+			}
+
+			if (this->chunks.find(westChunkKey) != this->chunks.end())
+			{
+				Chunk	*westChunk = this->chunks[westChunkKey];
+
+				currentChunk->SetWestNeighbour(westChunk);
+				westChunk->SetEastNeighbour(currentChunk);
+			}
 		}
 	}
+}
+
+// ========================================================================== //
+//    Functions                                                               //
+// ========================================================================== //
+
+bool	isLoad(const i32 playerX, const i32 playerZ, const i32 currentX, const i32 currentZ, const i32 radius)
+{
+	i32	dx = currentX - playerX;
+	i32	dy = currentZ - playerZ;
+	return (dx * dx + dy * dy <= radius * radius);
 }
