@@ -5,20 +5,15 @@
 
 # include "Chunk.hpp"
 
-# include <vector>
+# include <unordered_map>
 # include <iostream>
 
 class World
 {
 	public:
-		// void	init();
-		void	load(const int playerX, const int playerY);
-		// void	reload();
-		// void	actuLoad();
-		std::vector<Chunk *>	chunks;
+		void	Load(const i32 playerX, const i32 playerZ);
 
-	protected:
-
-	private:
-		// Chunk	_Chunks[];
+		std::unordered_map<u64, Chunk *>	chunks;
 };
+
+bool	isLoad(const i32 playerX, const i32 playerZ, const i32 currentX, const i32 currentZ, const i32 radius);
