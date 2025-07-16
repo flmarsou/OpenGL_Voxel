@@ -7,7 +7,7 @@
 
 # include <GLAD/glad.h>
 
-struct	Voxel
+struct	BitShiftVoxel
 {
 	// [- - - - - - - b b b b b b b b b b z z z z z y y y y y x x x x x]
 	static u32	Pack(u8 x, u8 y, u8 z, u32 blockID)
