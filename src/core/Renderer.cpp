@@ -98,7 +98,14 @@ void	Renderer::Render(GLFWwindow *win)
 					{
 						if (!chunk.second->IsFaceVisible(x, y, z, face))
 							continue ;
-
+						if (face == 5 && (!chunk.second->GetNorthNeighbour()))
+							continue;
+						if (face == 4 && (!chunk.second->GetSouthNeighbour()))
+							continue;
+						if (face == 0 && (!chunk.second->GetEastNeighbour()))
+							continue;
+						if (face == 1 && (!chunk.second->GetWestNeighbour()))
+							continue;
 						glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(face * 6 * sizeof(u32)));
 						this->_triangleCount += 2;
 						this->_vertexCount += 6;

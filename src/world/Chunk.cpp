@@ -89,17 +89,18 @@ u32		Chunk::GetNeighborVoxel(i8 x, i8 y, i8 z) const
 
 bool Chunk::IsSurrounded(u8 x, u8 y, u8 z) const
 {
+
 	// Check top/bottom boundaries
 	if (y == 0 || y == CHUNK_HEIGHT - 1)
 		return (false);
 
 	// Check all six neighbors
-	return (GetNeighborVoxel(x - 1, y, z)	// Left
-		&& GetNeighborVoxel(x + 1, y, z)	// Right
+	return ((!this->GetWestNeighbour() || GetNeighborVoxel(x - 1, y, z))	// Left = West
+		&& (!this->GetEastNeighbour() || GetNeighborVoxel(x + 1, y, z))	// Right = East
 		&& GetNeighborVoxel(x, y - 1, z)	// Bottom
 		&& GetNeighborVoxel(x, y + 1, z)	// Top
-		&& GetNeighborVoxel(x, y, z - 1)	// Front
-		&& GetNeighborVoxel(x, y, z + 1)	// Back
+		&& (!this->GetNorthNeighbour() || GetNeighborVoxel(x, y, z - 1))	// Front = North
+		&& (!this->GetSouthNeighbour() || GetNeighborVoxel(x, y, z + 1))	// Back = South
 	);
 }
 
