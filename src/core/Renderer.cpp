@@ -9,18 +9,17 @@ void	Renderer::Init()
 	glEnable(GL_CULL_FACE);
 	// glEnable(GL_DEPTH_TEST);
 
-	// --- Voxel ---
-	this->_voxelMesh.Init();
-	this->_voxelMesh.Bind();
-
 	// --- Shaders ---
 	this->_voxelShader.Init(VOXEL_VERTEX_PATH, VOXEL_FRAGMENT_PATH);
 	this->_voxelShader.Use();
 
 	// --- Textures ---
-	stbi_set_flip_vertically_on_load(true);
-	this->_texture.Load(DEBUG_BLOCK_PATH, DEBUG_BLOCK);
-	this->_texture.Load(DIRT_BLOCK_PATH, DIRT_BLOCK);
+	const std::vector<const char *>	textures = {
+		DEBUG_BLOCK_PATH,
+		DIRT_BLOCK_PATH
+	};
+	this->_texture.LoadArray(textures);
+	this->_texture.Bind();
 
 	// --- Camera ---
 	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16, 16, 100));
@@ -47,13 +46,8 @@ void	Renderer::Render(GLFWwindow *win)
 	// --- Chunks Loop ---
 	for (auto &chunk : this->_world.chunks)
 	{
-		i32	chunkX;
-		i32	chunkZ;
-
-		BitShiftChunk::Unpack(chunk.first, chunkX, chunkZ);
-
-		chunkX *= CHUNK_WIDTH;
-		chunkZ *= CHUNK_WIDTH;
+		i32	chunkX = chunk.second->GetChunkX() * CHUNK_WIDTH;
+		i32	chunkZ = chunk.second->GetChunkZ() * CHUNK_WIDTH;
 
 		glm::vec3	min = glm::vec3(chunkX, 0, chunkZ);
 		glm::vec3	max = min + glm::vec3(CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH);
@@ -62,50 +56,11 @@ void	Renderer::Render(GLFWwindow *win)
 		if (!this->_frustum.IsChunkVisible(min, max))
 			continue ;
 
-		// --- Voxels Loop ---
-		for (i32 x = 0; x < CHUNK_WIDTH; x++)
-		{
-			for (i32 y = 0; y < CHUNK_HEIGHT; y++)
-			{
-				for (i32 z = 0; z < CHUNK_WIDTH; z++)
-				{
-					// Skip rendering if block is hidden
-					if (chunk.second->IsSurrounded(x, y, z))
-						continue ;
+		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX, 0, chunkZ));
+		glUniformMatrix4fv(glGetUniformLocation(_voxelShader.program, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
 
-					// Get voxel info
-					u32	voxel = chunk.second->GetVoxel(x, y, z);
-
-					u8	vx;
-					u8	vy;
-					u8	vz;
-					u32	blockID;
-					BitShiftVoxel::Unpack(voxel, vx, vy, vz, blockID);
-
-					switch (blockID)
-					{
-						case (DIRT_BLOCK): this->_texture.Bind(DIRT_BLOCK); break ;
-						default: this->_texture.Bind(DEBUG_BLOCK); break ;
-					}
-
-					// Get voxel position
-					glm::mat4	model = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX + vx, 0 + vy, chunkZ + vz));
-
-					glUniformMatrix4fv(glGetUniformLocation(this->_voxelShader.program, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
-
-					// Skip render if face is hidden
-					for (i8 face = 0; face < 6; face++)
-					{
-						if (!chunk.second->IsFaceVisible(x, y, z, face))
-							continue ;
-
-						glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, (void *)(face * 6 * sizeof(u32)));
-						this->_triangleCount += 2;
-						this->_vertexCount += 6;
-					}
-				}
-			}
-		}
+		glBindVertexArray(chunk.second->GetVAO());
+		glDrawElements(GL_TRIANGLES, chunk.second->GetIndexCount(), GL_UNSIGNED_INT, 0);
 	}
 }
 
@@ -125,7 +80,6 @@ void	Renderer::PrintStatistics()
 void	Renderer::Cleanup()
 {
 	this->_voxelShader.Cleanup();
-	this->_voxelMesh.Cleanup();
 	this->_texture.Cleanup();
 
 	for (auto &chunk : this->_world.chunks)

@@ -7,12 +7,11 @@
 Chunk::Chunk(const i32 x, const i32 z)
 	:	_chunkX(x), _chunkZ(z)
 {
-	std::cout << INFO "Chunk " <<
-		"X: " << _chunkX <<
-		" | Z: " << _chunkZ <<
-		" loaded" << std::endl;
+	std::cout << INFO "Chunk " << "X: " << _chunkX << " | Z: " << _chunkZ << " loaded" << std::endl;
 
-	Init();
+	GenerateBuffers();
+	GenerateVoxels();
+	GenerateMesh();
 }
 
 Chunk::~Chunk()
@@ -27,26 +26,27 @@ Chunk::~Chunk()
 //    Init                                                                    //
 // ========================================================================== //
 
-void Chunk::Init()
+void Chunk::GenerateVoxels()
 {
 	for (u8 x = 0; x < CHUNK_WIDTH; x++)
-		for (u8 y = 0; y < CHUNK_HEIGHT; y++)
-			for (u8 z = 0; z < CHUNK_WIDTH; z++)
-				if (y == CHUNK_HEIGHT - 1 && x == CHUNK_WIDTH / 2 && z == CHUNK_WIDTH / 2)
-					this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DEBUG_BLOCK);
-				else
-					this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DIRT_BLOCK);
+	for (u8 y = 0; y < CHUNK_HEIGHT; y++)
+	for (u8 z = 0; z < CHUNK_WIDTH; z++)
+	{
+		if (y == CHUNK_HEIGHT - 1 && x == CHUNK_WIDTH / 2 && z == CHUNK_WIDTH / 2)
+			this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DEBUG_BLOCK);
+		else
+			this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DIRT_BLOCK);
+	}
 }
-
 
 // ========================================================================== //
 //    Setters & Getters                                                       //
 // ========================================================================== //
 
-u32	Chunk::GetVoxel(u8 x, u8 y, u8 z) const { return (this->_voxels[VOXEL_INDEX(x, y, z)]); }
+u32		Chunk::GetVoxel(u8 x, u8 y, u8 z) const { return (this->_voxels[VOXEL_INDEX(x, y, z)]); }
 
-i32	Chunk::GetChunkX() const { return (this->_chunkX); }
-i32	Chunk::GetChunkZ() const { return (this->_chunkZ); }
+i32		Chunk::GetChunkX() const { return (this->_chunkX); }
+i32		Chunk::GetChunkZ() const { return (this->_chunkZ); }
 
 void	Chunk::SetNorthNeighbour(Chunk *chunk) { this->_northNeighbour = chunk; }
 void	Chunk::SetSouthNeighbour(Chunk *chunk) { this->_southNeighbour = chunk; }
@@ -57,6 +57,181 @@ Chunk	*Chunk::GetNorthNeighbour() const { return (this->_northNeighbour); }
 Chunk	*Chunk::GetSouthNeighbour() const { return (this->_southNeighbour); }
 Chunk	*Chunk::GetEastNeighbour() const { return (this->_eastNeighbour); }
 Chunk	*Chunk::GetWestNeighbour() const { return (this->_westNeighbour); }
+
+u32		Chunk::GetVAO() const { return (this->_vao); }
+u32		Chunk::GetIndexCount() const { return (this->_indexCount); }
+
+// ========================================================================== //
+//    Render                                                                  //
+// ========================================================================== //
+
+void	Chunk::GenerateBuffers()
+{
+	// VAO (Vertex Array Object)
+	glGenVertexArrays(1, &this->_vao);
+	glBindVertexArray(this->_vao);
+
+	// VBO (Vertex Buffer Object)
+	glGenBuffers(1, &this->_vbo);
+	glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
+
+	// EBO (Element Buffer Object)
+	glGenBuffers(1, &this->_ebo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_ebo);
+
+	// Position
+	glVertexAttribPointer(
+		0,							// Layout
+		3,							// Size
+		GL_FLOAT,					// Type
+		GL_FALSE,					// Normalized?
+		6 * sizeof(float),			// Stride
+		(void *)0					// Offset
+	);
+	glEnableVertexAttribArray(0);
+
+	// Texture Position
+	glVertexAttribPointer(
+		1,							// Layout
+		2,							// Size
+		GL_FLOAT,					// Type
+		GL_FALSE,					// Normalized?
+		6 * sizeof(float),			// Stride
+		(void *)(3 * sizeof(float))	// Offset
+	);
+	glEnableVertexAttribArray(1);
+
+	// Block ID
+	glVertexAttribPointer(
+		2,							// Layout
+		1,							// Size
+		GL_FLOAT,					// Type
+		GL_FALSE,					// Normalized?
+		6 * sizeof(float),			// Stride
+		(void *)(5 * sizeof(float))	// Offset
+	);
+	glEnableVertexAttribArray(2);
+
+	// Unbind
+	glBindVertexArray(0);
+}
+
+void	Chunk::GenerateMesh()
+{
+	std::vector<float>	vertices;
+	std::vector<u32>	indices;
+	u32					indexOffset = 0;
+
+	for (u8 vx = 0; vx < CHUNK_WIDTH; vx++)
+	for (u8 vy = 0; vy < CHUNK_HEIGHT; vy++)
+	for (u8 vz = 0; vz < CHUNK_WIDTH; vz++)
+	{
+		if (IsSurrounded(vx, vy, vz))
+			continue ;
+
+		u32	voxel = GetVoxel(vx, vy, vz);
+		u32	blockID;
+		BitShiftVoxel::UnpackBlockID(voxel, blockID);
+
+		for (u8 face = 0; face < 6; face++)
+		{
+			if (!IsFaceVisible(vx, vy, vz, face))
+				continue ;
+
+			auto	faceVert = getFaceVertices(vx, vy, vz, face, blockID);
+			vertices.insert(vertices.end(), faceVert.begin(), faceVert.end());
+
+			indices.push_back(indexOffset + 0);
+			indices.push_back(indexOffset + 1);
+			indices.push_back(indexOffset + 2);
+			indices.push_back(indexOffset + 2);
+			indices.push_back(indexOffset + 3);
+			indices.push_back(indexOffset + 0);
+
+			indexOffset += 4;
+		}
+	}
+
+	glBindVertexArray(this->_vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(u32), indices.data(), GL_STATIC_DRAW);
+
+	this->_indexCount = indices.size();
+
+	glBindVertexArray(0);
+}
+
+std::array<float, 24>	getFaceVertices(const u8 vx, const u8 vy, const u8 vz, const u8 face, const u32 blockID)
+{
+	std::array<float, 24>	verts;
+
+	const float	x = static_cast<float>(vx);
+	const float	y = static_cast<float>(vy);
+	const float	z = static_cast<float>(vz);
+
+	switch (face)
+	{
+		case (RIGHT):
+			verts = {
+				x + 1, y + 0, z + 0, 0, 0, (float)blockID,
+				x + 1, y + 1, z + 0, 0, 1, (float)blockID,
+				x + 1, y + 1, z + 1, 1, 1, (float)blockID,
+				x + 1, y + 0, z + 1, 1, 0, (float)blockID
+			};
+			break ;
+
+		case (LEFT):
+			verts = {
+				x + 0, y + 0, z + 1, 0, 0, (float)blockID,
+				x + 0, y + 1, z + 1, 0, 1, (float)blockID,
+				x + 0, y + 1, z + 0, 1, 1, (float)blockID,
+				x + 0, y + 0, z + 0, 1, 0, (float)blockID
+			};
+			break ;
+
+		case (TOP):
+			verts = {
+				x + 0, y + 1, z + 0, 0, 0, (float)blockID,
+				x + 0, y + 1, z + 1, 0, 1, (float)blockID,
+				x + 1, y + 1, z + 1, 1, 1, (float)blockID,
+				x + 1, y + 1, z + 0, 1, 0, (float)blockID
+			};
+			break ;
+
+		case (BOTTOM):
+			verts = {
+				x + 0, y + 0, z + 1, 0, 0, (float)blockID,
+				x + 0, y + 0, z + 0, 0, 1, (float)blockID,
+				x + 1, y + 0, z + 0, 1, 1, (float)blockID,
+				x + 1, y + 0, z + 1, 1, 0, (float)blockID
+			};
+			break ;
+
+		case (BACK):
+			verts = {
+				x + 0, y + 0, z + 1, 0, 0, (float)blockID,
+				x + 1, y + 0, z + 1, 1, 0, (float)blockID,
+				x + 1, y + 1, z + 1, 1, 1, (float)blockID,
+				x + 0, y + 1, z + 1, 0, 1, (float)blockID
+			};
+			break ;
+
+		case (FRONT):
+			verts = {
+				x + 1, y + 0, z + 0, 0, 0, (float)blockID,
+				x + 0, y + 0, z + 0, 1, 0, (float)blockID,
+				x + 0, y + 1, z + 0, 1, 1, (float)blockID,
+				x + 1, y + 1, z + 0, 0, 1, (float)blockID
+			};
+			break ;
+	}
+
+	return (verts);
+}
 
 // ========================================================================== //
 //    Methods                                                                 //
