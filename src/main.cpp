@@ -19,16 +19,30 @@ i32	main()
 		return (1);
 	}
 
+	double	lastTime = glfwGetTime();
+	u32		frames = 0;
+
 	while (!window.ShouldClose())
 	{
+		double	currentTime = glfwGetTime();
+		frames++;
+
+		if (currentTime - lastTime >= 1.0)
+		{
+			double	fps = frames / (currentTime - lastTime);
+			frames = 0;
+			lastTime = currentTime;
+
+			std::string	title = std::string(WINDOW_TITLE) + " | FPS: " + std::to_string((u32)fps);
+			window.SetWindowTitle(title.c_str());
+		}
+
 		window.Clear();
-
 		renderer.Render(window.win);
-
 		window.SwapBuffers();
 		window.PollEvents();
 
-		renderer.PrintStatistics();
+		// renderer.PrintStatistics();
 	}
 
 	renderer.Cleanup();
