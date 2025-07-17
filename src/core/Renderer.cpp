@@ -22,6 +22,7 @@ void	Renderer::Init()
 	this->_texture.Bind();
 
 	// --- Camera ---
+	// this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16.5f, 45, 16.5f));
 	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16.5f, 45, 16.5f));
 
 	// --- World ---
@@ -45,20 +46,20 @@ void	Renderer::Render(GLFWwindow *win)
 
 	// ReloadChunk if necessary
 
-	static float	ancientX = this->_camera.Position.x / 32;
-	static float	ancientZ = this->_camera.Position.z / 32;
+	static float	ancientX = this->_camera.Position.x / CHUNK_WIDTH;
+	static float	ancientZ = this->_camera.Position.z / CHUNK_WIDTH;
 
 	// West or east
-	if (ancientX != this->_camera.Position.x / 32)
+	if (ancientX != this->_camera.Position.x / CHUNK_WIDTH)
 	{
-		this->_world.Reload(this->_camera.Position.x / 32, this->_camera.Position.z / 32);
-		ancientX = this->_camera.Position.x / 32;
+		this->_world.Reload(this->_camera.Position.x / CHUNK_WIDTH, this->_camera.Position.z / CHUNK_WIDTH);
+		ancientX = this->_camera.Position.x / CHUNK_WIDTH;
 	}
 	// North or South
-	else if (ancientZ != this->_camera.Position.z / 32)
+	else if (ancientZ != this->_camera.Position.z / CHUNK_WIDTH)
 	{
-		this->_world.Reload(this->_camera.Position.x / 32, this->_camera.Position.z / 32);
-		ancientZ = this->_camera.Position.z / 32;
+		this->_world.Reload(this->_camera.Position.x / CHUNK_WIDTH, this->_camera.Position.z / CHUNK_WIDTH);
+		ancientZ = this->_camera.Position.z / CHUNK_WIDTH;
 	}
 
 	// --- Chunks Loop ---
