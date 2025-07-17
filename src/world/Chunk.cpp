@@ -272,7 +272,6 @@ u32		Chunk::GetNeighborVoxel(i8 x, i8 y, i8 z) const
 
 bool Chunk::IsSurrounded(u8 x, u8 y, u8 z) const
 {
-
 	// Check top/bottom boundaries
 	if (y == 0 || y == CHUNK_HEIGHT - 1)
 		return (false);

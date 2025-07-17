@@ -1,7 +1,6 @@
 #include "config.hpp"
 #include "Window.hpp"
 #include "Renderer.hpp"
-#include "World.hpp"
 
 i32	main()
 {
