@@ -1,9 +1,6 @@
 #pragma once
 
-# include "types.hpp"
-# include "options.hpp"
-
-# include <iostream>
+# include "config.hpp"
 
 # include <GLAD/glad.h>
 # include <GLFW/glfw3.h>

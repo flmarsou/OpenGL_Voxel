@@ -1,12 +1,11 @@
 #pragma once
 
-# include "types.hpp"
-# include "options.hpp"
+# include "config.hpp"
 
 # include "VoxelShader.hpp"
 
-# define GLM_ENABLE_EXPERIMENTAL
 # include <GLFW/glfw3.h>
+# define GLM_ENABLE_EXPERIMENTAL
 # include <GLM/glm.hpp>
 # include <GLM/gtc/matrix_transform.hpp>
 # include <GLM/gtc/type_ptr.hpp>

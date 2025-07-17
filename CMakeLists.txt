@@ -15,7 +15,6 @@ add_executable(${CMAKE_PROJECT_NAME}
 	src/core/Renderer.cpp
 	src/core/Camera.cpp
 
-	src/gfx/VoxelMesh.cpp
 	src/gfx/VoxelShader.cpp
 	src/gfx/Texture.cpp
 
