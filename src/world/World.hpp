@@ -1,12 +1,10 @@
 #pragma once
 
-# include "types.hpp"
-# include "options.hpp"
+# include "config.hpp"
 
 # include "Chunk.hpp"
 
 # include <unordered_map>
-# include <iostream>
 
 class World
 {

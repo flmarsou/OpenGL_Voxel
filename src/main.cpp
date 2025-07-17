@@ -1,4 +1,4 @@
-#include "options.hpp"
+#include "config.hpp"
 #include "Window.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"

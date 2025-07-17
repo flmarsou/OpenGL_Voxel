@@ -1,11 +1,9 @@
 #pragma once
 
-# include "types.hpp"
-# include "options.hpp"
+# include "config.hpp"
 
 # include <GLAD/glad.h>
 
-# include <iostream>
 # include <string>
 # include <fstream>
 # include <sstream>
