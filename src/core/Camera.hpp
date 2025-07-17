@@ -45,5 +45,7 @@ class	Camera
 		float		height;
 
 	private:
-		u8	_facing;
+		u8		_facing;
+		float	_yaw = 0.0f;
+		float	_pitch = -90.0f;
 };

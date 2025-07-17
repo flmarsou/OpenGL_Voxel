@@ -56,49 +56,60 @@ void	Camera::Matrix(float nearPlane, float farPlane, u32 shader, const char *uni
 void	Camera::Input(GLFWwindow *window)
 {
 	// --- Positional Movements ---
+	const glm::vec3	zMovement = glm::normalize(glm::vec3(Direction.x, 0.0f, Direction.z));
+	const glm::vec3	xMovement = glm::normalize(glm::cross(zMovement, glm::vec3(0.0f, 1.0f, 0.0f)));
+
 	// Foward
 	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-		this->Position += CAMERA_SPEED * this->Direction;
+		this->Position += CAMERA_SPEED * zMovement;
 
 	// Left
 	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-		this->Position += CAMERA_SPEED * -glm::normalize(glm::cross(this->Direction, this->Angle));
+		this->Position -= CAMERA_SPEED * xMovement;
 
 	// Backward
 	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-		this->Position += CAMERA_SPEED * -this->Direction;
+		this->Position -= CAMERA_SPEED * zMovement;
 
 	// Left
 	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-		this->Position += CAMERA_SPEED * glm::normalize(glm::cross(this->Direction, this->Angle));
+		this->Position += CAMERA_SPEED * xMovement;
 
 	// Up
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-		this->Position += CAMERA_SPEED * this->Angle;
+		this->Position += CAMERA_SPEED * glm::vec3(0.0f, 1.0f, 0.0f);
 
 	// Down
 	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS)
-		this->Position -= CAMERA_SPEED * this->Angle;
+		this->Position += CAMERA_SPEED * glm::vec3(0.0f, -1.0f, 0.0f);
 
 	// --- Directional Movement ---
 	if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS)
 	{
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 
-	double	mouseX;
-	double	mouseY;
-	glfwGetCursorPos(window, &mouseX, &mouseY);
+		double	mouseX;
+		double	mouseY;
+		glfwGetCursorPos(window, &mouseX, &mouseY);
 
-	float	rotX = CAMERA_SENSITIVITY * (float)(mouseY - this->height / 2);
-	float	rotY = CAMERA_SENSITIVITY * (float)(mouseX - this->width / 2);
+		float	rotX = CAMERA_SENSITIVITY * (float)(mouseY - this->height / 2);
+		float	rotY = CAMERA_SENSITIVITY * (float)(mouseX - this->width / 2);
 
-	glm::vec3	newDirection = glm::rotate(this->Direction, glm::radians(-rotX), glm::normalize(glm::cross(this->Direction, this->Angle)));
+		this->_yaw += rotY;
+		this->_pitch -= rotX;
 
-	if (!(glm::angle(newDirection, this->Angle) <= glm::radians(5.0f)) || (glm::angle(newDirection, -this->Angle) <= glm::radians(5.0f)))
-		this->Direction = newDirection;
+		if (this->_pitch > 89.0f)
+			this->_pitch = 89.0f;
+		if (this->_pitch < -89.0f)
+			this->_pitch = -89.0f;
 
-	this->Direction = glm::rotate(this->Direction, glm::radians(-rotY), this->Angle);
+		glm::vec3	newDirection;
+		newDirection.x = cos(glm::radians(this->_yaw)) * cos(glm::radians(this->_pitch));
+		newDirection.y = sin(glm::radians(this->_pitch));
+		newDirection.z = sin(glm::radians(this->_yaw)) * cos(glm::radians(this->_pitch));
 
-	glfwSetCursorPos(window, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+		this->Direction = glm::normalize(newDirection);
+
+		glfwSetCursorPos(window, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 	}
 }
