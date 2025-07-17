@@ -44,6 +44,10 @@ void	Renderer::Render(GLFWwindow *win)
 
 	this->_frustum.ExtractPlanes(this->_camera.Proj * this->_camera.View);
 
+	// ReloadChunk if necessary
+
+	
+
 	// --- Chunks Loop ---
 	for (auto &chunk : this->_world.chunks)
 	{
