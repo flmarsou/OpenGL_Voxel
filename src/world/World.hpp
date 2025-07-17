@@ -11,7 +11,9 @@
 class World
 {
 	public:
+		void	SetNeighbors(i32 currentX, i32 currentZ, u64 currentChunkKey);
 		void	Load(const i32 playerX, const i32 playerZ);
+		void	Reload(const i32 playerX, const i32 playerZ);
 
 		std::unordered_map<u64, Chunk *>	chunks;
 };

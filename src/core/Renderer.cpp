@@ -23,7 +23,7 @@ void	Renderer::Init()
 	this->_texture.Load(DIRT_BLOCK_PATH, DIRT_BLOCK);
 
 	// --- Camera ---
-	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16, 16, 100));
+	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16.5f, 45, 16.5f));
 
 	// --- World ---
 	this->_world.Load(0, 0);
@@ -46,7 +46,21 @@ void	Renderer::Render(GLFWwindow *win)
 
 	// ReloadChunk if necessary
 
-	
+	static float	ancientX = this->_camera.Position.x / 32;
+	static float	ancientZ = this->_camera.Position.z / 32;
+
+	// West or east
+	if (ancientX != this->_camera.Position.x / 32)
+	{
+		this->_world.Reload(this->_camera.Position.x / 32, this->_camera.Position.z / 32);
+		ancientX = this->_camera.Position.x / 32;
+	}
+	// North or South
+	else if (ancientZ != this->_camera.Position.z / 32)
+	{
+		this->_world.Reload(this->_camera.Position.x / 32, this->_camera.Position.z / 32);
+		ancientZ = this->_camera.Position.z / 32;
+	}
 
 	// --- Chunks Loop ---
 	for (auto &chunk : this->_world.chunks)
