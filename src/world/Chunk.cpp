@@ -21,6 +21,14 @@ Chunk::~Chunk()
 		"X: " << _chunkX <<
 		" | Z: " << _chunkZ <<
 		" unloaded" RESET << std::endl;
+	if (this->GetNorthNeighbour())
+		this->GetNorthNeighbour()->SetSouthNeighbour(nullptr);
+	if (this->GetSouthNeighbour())
+		this->GetSouthNeighbour()->SetNorthNeighbour(nullptr);
+	if (this->GetEastNeighbour())
+		this->GetEastNeighbour()->SetWestNeighbour(nullptr);
+	if (this->GetWestNeighbour())
+		this->GetWestNeighbour()->SetEastNeighbour(nullptr);
 }
 
 // ========================================================================== //

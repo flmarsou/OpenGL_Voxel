@@ -30,11 +30,11 @@ enum	TextureID
 };
 
 // --- Camera Settings ---
-# define CAMERA_SPEED			0.5f
+# define CAMERA_SPEED			2.0f
 # define CAMERA_SENSITIVITY		0.1f
-# define CAMERA_FOV				45.0f
+# define CAMERA_FOV				90.0f
 
 // --- World ---
-# define RENDER_DISTANCE	5
+# define RENDER_DISTANCE	2
 # define CHUNK_WIDTH		32
 # define CHUNK_HEIGHT		32
