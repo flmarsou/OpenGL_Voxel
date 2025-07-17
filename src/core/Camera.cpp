@@ -11,6 +11,19 @@ void	Camera::Init(const u32 width, const u32 height, const glm::vec3 pos)
 	this->Position = pos;
 }
 
+// ========================================================================== //
+//    Getters                                                                 //
+// ========================================================================== //
+
+u8		Camera::GetFacingDirection() const
+{
+	return (this->_facing);
+}
+
+// ========================================================================== //
+//    Methods                                                                 //
+// ========================================================================== //
+
 void	Camera::Matrix(float nearPlane, float farPlane, u32 shader, const char *uniform)
 {
 	this->View = glm::lookAt(
@@ -27,11 +40,18 @@ void	Camera::Matrix(float nearPlane, float farPlane, u32 shader, const char *uni
 	);
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, uniform), 1, GL_FALSE, glm::value_ptr(this->Proj * this->View));
-}
 
-// ========================================================================== //
-//    Input                                                                   //
-// ========================================================================== //
+	if (fabs(this->Direction.x) > fabs(this->Direction.z))
+		if (this->Direction.x > 0)
+			this->_facing = EAST;
+		else
+			this->_facing = WEST;
+	else
+		if (this->Direction.z > 0)
+			this->_facing = SOUTH;
+		else
+			this->_facing = NORTH;
+}
 
 void	Camera::Input(GLFWwindow *window)
 {

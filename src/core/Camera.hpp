@@ -13,14 +13,28 @@
 # include <GLM/gtx/rotate_vector.hpp>
 # include <GLM/gtx/vector_angle.hpp>
 
+enum	FacingDirection
+{
+	NORTH,
+	SOUTH,
+	EAST,
+	WEST
+};
+
 class	Camera
 {
 	public:
+		// --- Loader ---
 		void	Init(const u32 width, const u32 height, const glm::vec3 pos);
 
+		// --- Methods ---
 		void	Matrix(float nearPlane, float farPlane, u32 shader, const char *uniform);
 		void	Input(GLFWwindow *window);
 
+		// --- Getters ---
+		u8		GetFacingDirection() const;
+
+		// --- Variables ---
 		glm::vec3	Position;
 		glm::vec3	Direction = glm::vec3(0.0f, 0.0f, -1.0f);
 		glm::vec3	Angle = glm::vec3(0.0f, 1.0f, 0.0f);
@@ -30,4 +44,7 @@ class	Camera
 
 		float		width;
 		float		height;
+
+	private:
+		u8	_facing;
 };
