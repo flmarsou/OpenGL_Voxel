@@ -4,7 +4,65 @@
 //    Load                                                                    //
 // ========================================================================== //
 
-// Check and set neighboring chunks
+void	World::Load(const i32 playerX, const i32 playerZ)
+{
+	const i32	radius = RENDER_DISTANCE / 2;
+
+	for (i32 offsetZ = -radius; offsetZ <= radius; offsetZ++)
+	{
+		for (i32 offsetX = -radius; offsetX <= radius; offsetX++)
+		{
+			i32	currentX = playerX + offsetX;
+			i32	currentZ = playerZ + offsetZ;
+
+			if (!isLoad(playerX, playerZ, currentX, currentZ, radius))
+				continue ;
+
+			// Create chunk
+			u64	currentChunkKey = BitShiftChunk::Pack(currentX, currentZ);
+			this->chunks[currentChunkKey] = new Chunk(currentX, currentZ);
+
+			this->SetNeighbors(currentX, currentZ, currentChunkKey);
+		}
+	}
+}
+
+void	World::Reload(const i32 playerX, const i32 playerZ)
+{
+	const i32	radius = RENDER_DISTANCE / 2;
+
+	for (i32 offsetZ = -radius - 1; offsetZ <= radius + 1; offsetZ++)
+	{
+		for (i32 offsetX = -radius - 1; offsetX <= radius + 1; offsetX++)
+		{
+			i32	currentX = playerX + offsetX;
+			i32	currentZ = playerZ + offsetZ;
+			u64	currentChunkKey = BitShiftChunk::Pack(currentX, currentZ);
+
+			if (this->chunks.find(currentChunkKey) == nullptr)
+			{
+				if (isLoad(playerX, playerZ, currentX, currentZ, radius))
+				{
+					this->chunks[currentChunkKey] = new Chunk(currentX, currentZ);
+					this->SetNeighbors(currentX, currentZ, currentChunkKey);
+				}
+			}
+			else
+			{
+				if (!isLoad(playerX, playerZ, currentX, currentZ, radius))
+				{
+					delete (this->chunks[currentChunkKey]);
+					this->chunks.erase(currentChunkKey);
+				}
+			}
+		}
+	}
+}
+
+// ========================================================================== //
+//    Methods                                                                 //
+// ========================================================================== //
+
 void	World::SetNeighbors(i32 currentX, i32 currentZ, u64 currentChunkKey)
 {
 	Chunk	*currentChunk = this->chunks[currentChunkKey];
@@ -44,60 +102,6 @@ void	World::SetNeighbors(i32 currentX, i32 currentZ, u64 currentChunkKey)
 
 		currentChunk->SetWestNeighbour(westChunk);
 		westChunk->SetEastNeighbour(currentChunk);
-	}
-}
-
-void	World::Load(const i32 playerX, const i32 playerZ)
-{
-	const i32	radius = RENDER_DISTANCE / 2;
-
-	for (i32 offsetZ = -radius; offsetZ <= radius; offsetZ++)
-	{
-		for (i32 offsetX = -radius; offsetX <= radius; offsetX++)
-		{
-			i32	currentX = playerX + offsetX;
-			i32	currentZ = playerZ + offsetZ;
-
-			if (!isLoad(playerX, playerZ, currentX, currentZ, radius))
-				continue ;
-
-			// Create chunk
-			u64	currentChunkKey = BitShiftChunk::Pack(currentX, currentZ);
-			this->chunks[currentChunkKey] = new Chunk(currentX, currentZ);
-
-			this->SetNeighbors(currentX, currentZ, currentChunkKey);
-		}
-	}
-}
-
-void	World::Reload(const i32 playerX, const i32 playerZ)
-{
-	const i32	radius = RENDER_DISTANCE / 2;
-
-	for (i32 offsetZ = -radius - 1; offsetZ <= radius + 1; offsetZ++)
-	{
-		for (i32 offsetX = -radius - 1; offsetX <= radius + 1; offsetX++)
-		{
-			i32	currentX = playerX + offsetX;
-			i32	currentZ = playerZ + offsetZ;
-
-			if (this->chunks.find(BitShiftChunk::Pack(currentX, currentZ)) == nullptr)
-			{
-				if (isLoad(playerX, playerZ, currentX, currentZ, radius))
-				{
-					this->chunks[BitShiftChunk::Pack(currentX, currentZ)] = new Chunk(currentX, currentZ);
-					this->SetNeighbors(currentX, currentZ, BitShiftChunk::Pack(currentX, currentZ));
-				}
-			}
-			else
-			{
-				if (!isLoad(playerX, playerZ, currentX, currentZ, radius))
-				{
-					delete (this->chunks[BitShiftChunk::Pack(currentX, currentZ)]);
-					this->chunks.erase(BitShiftChunk::Pack(currentX, currentZ));
-				}
-			}
-		}
 	}
 }
 
