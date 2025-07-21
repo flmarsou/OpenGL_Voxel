@@ -46,20 +46,30 @@ void	Renderer::Render(GLFWwindow *win)
 
 	// ReloadChunk if necessary
 
-	static float	ancientX = this->_camera.Position.x / CHUNK_WIDTH;
-	static float	ancientZ = this->_camera.Position.z / CHUNK_WIDTH;
+	static float	ancientX = roundf(this->_camera.Position.x);
+	static float	ancientZ = roundf(this->_camera.Position.z);
+	int			save[2];
+
+	if (this->_camera.Position.x < 0)
+		save[0] = static_cast<int>(((this->_camera.Position.x) / CHUNK_WIDTH) - 1);
+	else
+		save[0] = static_cast<int>(this->_camera.Position.x) / CHUNK_WIDTH;
+	if (this->_camera.Position.z < 0)
+		save[1] = static_cast<int>(((this->_camera.Position.z) / CHUNK_WIDTH) - 1);
+	else
+		save[1] = static_cast<int>(this->_camera.Position.z) / CHUNK_WIDTH;
 
 	// West or east
-	if (ancientX != this->_camera.Position.x / CHUNK_WIDTH)
+	if (ancientX != save[0])
 	{
-		this->_world.Reload(this->_camera.Position.x / CHUNK_WIDTH, this->_camera.Position.z / CHUNK_WIDTH);
-		ancientX = this->_camera.Position.x / CHUNK_WIDTH;
+		ancientX = save[0];
+		this->_world.Reload(save[0], save[1]);
 	}
 	// North or South
-	else if (ancientZ != this->_camera.Position.z / CHUNK_WIDTH)
+	else if (ancientZ != save[1])
 	{
-		this->_world.Reload(this->_camera.Position.x / CHUNK_WIDTH, this->_camera.Position.z / CHUNK_WIDTH);
-		ancientZ = this->_camera.Position.z / CHUNK_WIDTH;
+		ancientZ = save[1];
+		this->_world.Reload(save[0], save[1]);
 	}
 
 	// --- Chunks Loop ---
