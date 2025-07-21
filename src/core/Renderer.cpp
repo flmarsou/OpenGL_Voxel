@@ -16,6 +16,8 @@ void	Renderer::Init()
 	// --- Textures ---
 	const std::vector<const char *>	textures = {
 		DIRT_BLOCK_PATH,
+		GRASS_BLOCK_TOP_PATH,
+		GRASS_BLOCK_SIDE_PATH,
 		DEBUG_BLOCK_PATH
 	};
 	this->_texture.LoadArray(textures);
