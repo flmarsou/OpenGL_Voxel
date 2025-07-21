@@ -25,6 +25,8 @@
 # define DIRT_BLOCK_PATH		"../assets/dirt_block.png"
 # define GRASS_BLOCK_TOP_PATH	"../assets/grass_block_top.png"
 # define GRASS_BLOCK_SIDE_PATH	"../assets/grass_block_side.png"
+# define STONE_BLOCK_PATH		"../assets/stone_block.png"
+# define SAND_BLOCK_PATH		"../assets/sand_block.png"
 
 // --- Block Enums ---
 enum	BlockIDs
@@ -32,6 +34,8 @@ enum	BlockIDs
 	AIR_BLOCK,
 	DIRT_BLOCK,
 	GRASS_BLOCK,
+	STONE_BLOCK,
+	SAND_BLOCK,
 	DEBUG_BLOCK,
 };
 
@@ -40,6 +44,8 @@ enum	TextureIDs
 	DIRT_BLOCK_TEXTURE,
 	GRASS_BLOCK_TOP_TEXTURE,
 	GRASS_BLOCK_SIDE_TEXTURE,
+	STONE_BLOCK_TEXTURE,
+	SAND_BLOCK_TEXTURE,
 	DEBUG_BLOCK_TEXTURE,
 };
 

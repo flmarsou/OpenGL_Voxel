@@ -18,6 +18,8 @@ void	Renderer::Init()
 		DIRT_BLOCK_PATH,
 		GRASS_BLOCK_TOP_PATH,
 		GRASS_BLOCK_SIDE_PATH,
+		STONE_BLOCK_PATH,
+		SAND_BLOCK_PATH,
 		DEBUG_BLOCK_PATH
 	};
 	this->_texture.LoadArray(textures);

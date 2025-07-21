@@ -131,6 +131,8 @@ static u32	getFaceTexture(const u8 face, const u32 blockID)
 			if (face == TOP) return (GRASS_BLOCK_TOP_TEXTURE);
 			if (face == BOTTOM) return (DIRT_BLOCK_TEXTURE);
 			return (GRASS_BLOCK_SIDE_TEXTURE);
+		case (STONE_BLOCK): return (STONE_BLOCK_TEXTURE);
+		case (SAND_BLOCK): return (SAND_BLOCK_TEXTURE);
 		default: return (DEBUG_BLOCK_TEXTURE);
 	}
 }
