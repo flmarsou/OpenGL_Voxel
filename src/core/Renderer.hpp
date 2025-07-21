@@ -101,7 +101,4 @@ class	Renderer
 		World		_world;
 
 		Frustum		_frustum;
-
-		u32	_triangleCount;
-		u32	_vertexCount;
 };

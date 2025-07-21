@@ -23,6 +23,7 @@ i32	main()
 
 	while (!window.ShouldClose())
 	{
+		// --- FPS Counter ---
 		double	currentTime = glfwGetTime();
 		frames++;
 
@@ -36,12 +37,11 @@ i32	main()
 			window.SetWindowTitle(title.c_str());
 		}
 
+		// --- Rendering ---
 		window.Clear();
 		renderer.Render(window.win);
 		window.SwapBuffers();
 		window.PollEvents();
-
-		// renderer.PrintStatistics();
 	}
 
 	renderer.Cleanup();

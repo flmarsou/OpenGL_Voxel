@@ -25,9 +25,6 @@ void	Renderer::Init()
 
 	// --- Camera ---
 	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(static_cast<float>(CHUNK_WIDTH / 2), 45, static_cast<float>(CHUNK_WIDTH / 2)));
-
-	// --- World ---
-	this->_world.Load(0, 0);
 }
 
 // ========================================================================== //
@@ -36,13 +33,9 @@ void	Renderer::Init()
 
 void	Renderer::Render(GLFWwindow *win)
 {
-	this->_triangleCount = 0;
-	this->_vertexCount = 0;
-
 	// --- Camera ---
 	this->_camera.Input(win);
 	this->_camera.Matrix(0.1f, 500.0f, this->_voxelShader.program, "uCamera");
-
 	this->_frustum.ExtractPlanes(this->_camera.Proj * this->_camera.View);
 
 	// --- Chunk Reloading ---
@@ -59,7 +52,7 @@ void	Renderer::Render(GLFWwindow *win)
 	else
 		save[1] = static_cast<i32>(this->_camera.Position.z) / CHUNK_WIDTH;
 
-	// West or east
+	// West or East
 	if (prevX != save[0])
 	{
 		prevX = save[0];
@@ -72,7 +65,7 @@ void	Renderer::Render(GLFWwindow *win)
 		this->_world.Reload(save[0], save[1]);
 	}
 
-	// --- Chunks Loop ---
+	// --- Chunks Rendering ---
 	for (auto &chunk : this->_world.chunks)
 	{
 		i32	chunkX = chunk.second->GetChunkX() * CHUNK_WIDTH;
@@ -95,15 +88,6 @@ void	Renderer::Render(GLFWwindow *win)
 // ========================================================================== //
 //    Methods                                                                 //
 // ========================================================================== //
-
-void	Renderer::PrintStatistics()
-{
-	std::cout << INFO "Triangles: " << this->_triangleCount << std::endl;
-	std::cout << INFO "Vertices: " << this->_vertexCount << std::endl;
-
-	this->_triangleCount = 0;
-	this->_vertexCount = 0;
-}
 
 void	Renderer::Cleanup()
 {

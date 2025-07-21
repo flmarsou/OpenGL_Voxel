@@ -112,4 +112,6 @@ void	Camera::Input(GLFWwindow *window)
 
 		glfwSetCursorPos(window, WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
 	}
+	else
+		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
