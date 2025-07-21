@@ -25,7 +25,13 @@ void	World::Load(const i32 playerX, const i32 playerZ)
 			this->SetNeighbors(currentX, currentZ, currentChunkKey);
 		}
 	}
+	for (auto &chunk : this->chunks)
+	{
+		chunk.second->GenerateMesh();
+	}
 }
+
+
 
 void	World::Reload(const i32 playerX, const i32 playerZ)
 {
@@ -45,6 +51,15 @@ void	World::Reload(const i32 playerX, const i32 playerZ)
 				{
 					this->chunks[currentChunkKey] = new Chunk(currentX, currentZ);
 					this->SetNeighbors(currentX, currentZ, currentChunkKey);
+					this->chunks[currentChunkKey]->GenerateMesh();
+					if (this->chunks[currentChunkKey]->GetNorthNeighbour())
+						this->chunks[currentChunkKey]->GetNorthNeighbour()->GenerateMesh();
+					if (this->chunks[currentChunkKey]->GetSouthNeighbour())
+						this->chunks[currentChunkKey]->GetSouthNeighbour()->GenerateMesh();
+					if (this->chunks[currentChunkKey]->GetEastNeighbour())
+						this->chunks[currentChunkKey]->GetEastNeighbour()->GenerateMesh();
+					if (this->chunks[currentChunkKey]->GetWestNeighbour())
+						this->chunks[currentChunkKey]->GetWestNeighbour()->GenerateMesh();
 				}
 			}
 			else

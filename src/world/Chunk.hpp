@@ -84,6 +84,7 @@ class	Chunk
 
 		// --- Render ---
 		void	GenerateMesh();
+		void	UnbindMesh();
 
 		// --- Methods ---
 		u32		GetNeighborVoxel(i8 x, i8 y, i8 z) const;

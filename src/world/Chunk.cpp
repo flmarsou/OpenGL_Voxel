@@ -11,7 +11,6 @@ Chunk::Chunk(const i32 x, const i32 z)
 
 	GenerateBuffers();
 	GenerateVoxels();
-	GenerateMesh();
 }
 
 Chunk::~Chunk()
@@ -28,6 +27,7 @@ Chunk::~Chunk()
 		this->GetEastNeighbour()->SetWestNeighbour(nullptr);
 	if (this->GetWestNeighbour())
 		this->GetWestNeighbour()->SetEastNeighbour(nullptr);
+	this->UnbindMesh();
 }
 
 // ========================================================================== //
@@ -126,6 +126,8 @@ void	Chunk::GenerateBuffers()
 
 void	Chunk::GenerateMesh()
 {
+	this->UnbindMesh();
+
 	std::vector<float>	vertices;
 	std::vector<u32>	indices;
 	u32					indexOffset = 0;
@@ -241,6 +243,13 @@ std::array<float, 24>	getFaceVertices(const u8 vx, const u8 vy, const u8 vz, con
 	return (verts);
 }
 
+void	Chunk::UnbindMesh()
+{
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
 // ========================================================================== //
 //    Methods                                                                 //
 // ========================================================================== //
@@ -248,20 +257,32 @@ std::array<float, 24>	getFaceVertices(const u8 vx, const u8 vy, const u8 vz, con
 u32		Chunk::GetNeighborVoxel(i8 x, i8 y, i8 z) const
 {
 	// Inside current chunk
-	if (x >= 0 && x < CHUNK_WIDTH
+	if ((x >= 0 && x < CHUNK_WIDTH)
 		&& y >= 0 && y < CHUNK_HEIGHT
 		&& z >= 0 && z < CHUNK_WIDTH)
 		return (GetVoxel(x, y, z));
 
 	// Outside current chunk
+	if (x < 0 && !this->_westNeighbour)
+		return (true);
+
 	if (x < 0 && this->_westNeighbour)
 		return (this->_westNeighbour->GetNeighborVoxel(x + CHUNK_WIDTH, y, z));
+
+	if (x >= CHUNK_WIDTH && !this->_eastNeighbour)
+		return(true);
 
 	if (x >= CHUNK_WIDTH && this->_eastNeighbour)
 		return (this->_eastNeighbour->GetNeighborVoxel(x - CHUNK_WIDTH, y, z));
 
+	if (z < 0 && !this->_northNeighbour)
+		return (true);
+
 	if (z < 0 && this->_northNeighbour)
 		return (this->_northNeighbour->GetNeighborVoxel(x, y, z + CHUNK_WIDTH));
+
+	if (z >= CHUNK_WIDTH && !this->_northNeighbour)
+		return (true);
 
 	if (z >= CHUNK_WIDTH && this->_southNeighbour)
 		return (this->_southNeighbour->GetNeighborVoxel(x, y, z - CHUNK_WIDTH));

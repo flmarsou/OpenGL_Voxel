@@ -23,7 +23,7 @@ void	Renderer::Init()
 
 	// --- Camera ---
 	// this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16.5f, 45, 16.5f));
-	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16.5f, 45, 16.5f));
+	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(static_cast<float>(CHUNK_WIDTH / 2), 45, static_cast<float>(CHUNK_WIDTH / 2)));
 
 	// --- World ---
 	this->_world.Load(0, 0);
