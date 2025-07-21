@@ -7,7 +7,7 @@
 void	Renderer::Init()
 {
 	glEnable(GL_CULL_FACE);
-	// glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
 
 	// --- Shaders ---
 	this->_voxelShader.Init(VOXEL_VERTEX_PATH, VOXEL_FRAGMENT_PATH);
@@ -15,14 +15,13 @@ void	Renderer::Init()
 
 	// --- Textures ---
 	const std::vector<const char *>	textures = {
-		DEBUG_BLOCK_PATH,
-		DIRT_BLOCK_PATH
+		DIRT_BLOCK_PATH,
+		DEBUG_BLOCK_PATH
 	};
 	this->_texture.LoadArray(textures);
 	this->_texture.Bind();
 
 	// --- Camera ---
-	// this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16.5f, 45, 16.5f));
 	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(static_cast<float>(CHUNK_WIDTH / 2), 45, static_cast<float>(CHUNK_WIDTH / 2)));
 
 	// --- World ---
@@ -44,31 +43,30 @@ void	Renderer::Render(GLFWwindow *win)
 
 	this->_frustum.ExtractPlanes(this->_camera.Proj * this->_camera.View);
 
-	// ReloadChunk if necessary
-
-	static float	ancientX = roundf(this->_camera.Position.x);
-	static float	ancientZ = roundf(this->_camera.Position.z);
-	int			save[2];
+	// --- Chunk Reloading ---
+	static float	prevX = roundf(this->_camera.Position.x);
+	static float	prevZ = roundf(this->_camera.Position.z);
+	i32				save[2];
 
 	if (this->_camera.Position.x < 0)
-		save[0] = static_cast<int>(((this->_camera.Position.x) / CHUNK_WIDTH) - 1);
+		save[0] = static_cast<i32>(((this->_camera.Position.x) / CHUNK_WIDTH) - 1);
 	else
-		save[0] = static_cast<int>(this->_camera.Position.x) / CHUNK_WIDTH;
+		save[0] = static_cast<i32>(this->_camera.Position.x) / CHUNK_WIDTH;
 	if (this->_camera.Position.z < 0)
-		save[1] = static_cast<int>(((this->_camera.Position.z) / CHUNK_WIDTH) - 1);
+		save[1] = static_cast<i32>(((this->_camera.Position.z) / CHUNK_WIDTH) - 1);
 	else
-		save[1] = static_cast<int>(this->_camera.Position.z) / CHUNK_WIDTH;
+		save[1] = static_cast<i32>(this->_camera.Position.z) / CHUNK_WIDTH;
 
 	// West or east
-	if (ancientX != save[0])
+	if (prevX != save[0])
 	{
-		ancientX = save[0];
+		prevX = save[0];
 		this->_world.Reload(save[0], save[1]);
 	}
 	// North or South
-	else if (ancientZ != save[1])
+	else if (prevZ != save[1])
 	{
-		ancientZ = save[1];
+		prevZ = save[1];
 		this->_world.Reload(save[0], save[1]);
 	}
 
@@ -81,7 +79,6 @@ void	Renderer::Render(GLFWwindow *win)
 		glm::vec3	min = glm::vec3(chunkX, 0, chunkZ);
 		glm::vec3	max = min + glm::vec3(CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH);
 
-		// Skip rendering if chunk is out of view
 		if (!this->_frustum.IsChunkVisible(min, max))
 			continue ;
 

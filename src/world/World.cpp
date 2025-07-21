@@ -31,44 +31,40 @@ void	World::Load(const i32 playerX, const i32 playerZ)
 	}
 }
 
-
-
 void	World::Reload(const i32 playerX, const i32 playerZ)
 {
 	const i32	radius = RENDER_DISTANCE / 2;
 
 	for (i32 offsetZ = -radius - 1; offsetZ <= radius + 1; offsetZ++)
+	for (i32 offsetX = -radius - 1; offsetX <= radius + 1; offsetX++)
 	{
-		for (i32 offsetX = -radius - 1; offsetX <= radius + 1; offsetX++)
-		{
-			i32	currentX = playerX + offsetX;
-			i32	currentZ = playerZ + offsetZ;
-			u64	currentChunkKey = BitShiftChunk::Pack(currentX, currentZ);
+		i32	currentX = playerX + offsetX;
+		i32	currentZ = playerZ + offsetZ;
+		u64	currentChunkKey = BitShiftChunk::Pack(currentX, currentZ);
 
-			if (this->chunks.find(currentChunkKey) == nullptr)
+		if (this->chunks.find(currentChunkKey) == nullptr)
+		{
+			if (isLoad(playerX, playerZ, currentX, currentZ, radius))
 			{
-				if (isLoad(playerX, playerZ, currentX, currentZ, radius))
-				{
-					this->chunks[currentChunkKey] = new Chunk(currentX, currentZ);
-					this->SetNeighbors(currentX, currentZ, currentChunkKey);
-					this->chunks[currentChunkKey]->GenerateMesh();
-					if (this->chunks[currentChunkKey]->GetNorthNeighbour())
-						this->chunks[currentChunkKey]->GetNorthNeighbour()->GenerateMesh();
-					if (this->chunks[currentChunkKey]->GetSouthNeighbour())
-						this->chunks[currentChunkKey]->GetSouthNeighbour()->GenerateMesh();
-					if (this->chunks[currentChunkKey]->GetEastNeighbour())
-						this->chunks[currentChunkKey]->GetEastNeighbour()->GenerateMesh();
-					if (this->chunks[currentChunkKey]->GetWestNeighbour())
-						this->chunks[currentChunkKey]->GetWestNeighbour()->GenerateMesh();
-				}
+				this->chunks[currentChunkKey] = new Chunk(currentX, currentZ);
+				this->SetNeighbors(currentX, currentZ, currentChunkKey);
+				this->chunks[currentChunkKey]->GenerateMesh();
+				if (this->chunks[currentChunkKey]->GetNorthNeighbour())
+					this->chunks[currentChunkKey]->GetNorthNeighbour()->GenerateMesh();
+				if (this->chunks[currentChunkKey]->GetSouthNeighbour())
+					this->chunks[currentChunkKey]->GetSouthNeighbour()->GenerateMesh();
+				if (this->chunks[currentChunkKey]->GetEastNeighbour())
+					this->chunks[currentChunkKey]->GetEastNeighbour()->GenerateMesh();
+				if (this->chunks[currentChunkKey]->GetWestNeighbour())
+					this->chunks[currentChunkKey]->GetWestNeighbour()->GenerateMesh();
 			}
-			else
+		}
+		else
+		{
+			if (!isLoad(playerX, playerZ, currentX, currentZ, radius))
 			{
-				if (!isLoad(playerX, playerZ, currentX, currentZ, radius))
-				{
-					delete (this->chunks[currentChunkKey]);
-					this->chunks.erase(currentChunkKey);
-				}
+				delete (this->chunks[currentChunkKey]);
+				this->chunks.erase(currentChunkKey);
 			}
 		}
 	}

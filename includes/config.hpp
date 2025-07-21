@@ -27,18 +27,17 @@
 // --- Texture Enum ---
 enum	TextureID
 {
-	DEBUG_BLOCK,
 	AIR_BLOCK,
 	DIRT_BLOCK,
-	TEXTURE_COUNT
+	DEBUG_BLOCK,
 };
 
 // --- Camera Settings ---
-# define CAMERA_SPEED			0.70f
+# define CAMERA_SPEED			1.0f
 # define CAMERA_SENSITIVITY		0.1f
 # define CAMERA_FOV				90.0f
 
 // --- World ---
-# define RENDER_DISTANCE	2
+# define RENDER_DISTANCE	10
 # define CHUNK_WIDTH		32
 # define CHUNK_HEIGHT		32
