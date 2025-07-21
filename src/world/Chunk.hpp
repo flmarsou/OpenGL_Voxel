@@ -113,4 +113,5 @@ class	Chunk
 		u32			_indexCount;
 };
 
+u32						getFaceTextures(const u8 face, const u32 blockID);
 std::array<float, 24>	getFaceVertices(const u8 vx, const u8 vy, const u8 vz, const u8 face, const u32 blockID);

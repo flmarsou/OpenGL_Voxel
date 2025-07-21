@@ -51,15 +51,14 @@ void Chunk::GenerateVoxels()
 		i32	worldZ = this->_chunkZ * CHUNK_WIDTH + z;
 
 		float	noiseValue = noise.GetNoise(static_cast<float>(worldX), static_cast<float>(worldZ));
-		i32		height = static_cast<i32>((noiseValue + 1) * (CHUNK_HEIGHT - 1));
+		i32		height = static_cast<i32>((noiseValue + 1) * 0.5f * (CHUNK_HEIGHT - 1));
 
 		for (u8 y = 0; y < CHUNK_HEIGHT; y++)
 		{
-			if (y <= height)
-				if (x == CHUNK_WIDTH / 2 && z == CHUNK_WIDTH / 2)
-					this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DEBUG_BLOCK);
-				else
-					this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DIRT_BLOCK);
+			if (y == height)
+				this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, GRASS_BLOCK);
+			else if (y <= height)
+				this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DIRT_BLOCK);
 			else
 				this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, AIR_BLOCK);
 		}
@@ -173,7 +172,8 @@ void	Chunk::GenerateMesh()
 			if (!IsFaceVisible(vx, vy, vz, face))
 				continue ;
 
-			auto	faceVert = getFaceVertices(vx, vy, vz, face, blockID - 1);
+			u32		textureIndex = getFaceTextures(face, blockID);
+			auto	faceVert = getFaceVertices(vx, vy, vz, face, textureIndex);
 			vertices.insert(vertices.end(), faceVert.begin(), faceVert.end());
 
 			indices.push_back(indexOffset + 0);
@@ -198,6 +198,21 @@ void	Chunk::GenerateMesh()
 	this->_indexCount = indices.size();
 
 	glBindVertexArray(0);
+}
+
+u32						getFaceTextures(const u8 face, const u32 blockID)
+{
+	switch (blockID)
+	{
+		case (DIRT_BLOCK):
+			return (DIRT_BLOCK_TEXTURE);
+		case (GRASS_BLOCK):
+			if (face == TOP) return (GRASS_BLOCK_TOP_TEXTURE);
+			if (face == BOTTOM) return (DIRT_BLOCK_TEXTURE);
+			return (GRASS_BLOCK_SIDE_TEXTURE);
+		default:
+			return (DEBUG_BLOCK_TEXTURE);
+	}
 }
 
 std::array<float, 24>	getFaceVertices(const u8 vx, const u8 vy, const u8 vz, const u8 face, const u32 blockID)
