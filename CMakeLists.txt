@@ -19,6 +19,8 @@ add_executable(${CMAKE_PROJECT_NAME}
 	src/gfx/Texture.cpp
 
 	src/world/Chunk.cpp
+	src/world/ChunkMesh.cpp
+	src/world/ChunkGeneration.cpp
 	src/world/World.cpp
 )
 

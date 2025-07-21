@@ -44,7 +44,8 @@ struct	BitShiftVoxel
 
 struct	BitShiftChunk
 {
-	// [z z z z z z z z z z z z z z z z z z z z z z z z z z z z z z z z x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x]
+	// [z z z z z z z z z z z z z z z z z z z z z z z z z z z z z z z z
+	// x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x x]
 	static u64	Pack(i32 x, i32 z)
 	{
 		return ((u64)((u32)(z)) << 32) | (u32)(x);
@@ -61,10 +62,12 @@ class	Chunk
 {
 	public:
 		// --- Constructors ---
-		Chunk(const i32 x, const i32 z);
+
+		Chunk(const i32 cx, const i32 cz);
 		~Chunk();
 
 		// --- Setters & Getters ---
+
 		u32		GetVoxelID(u8 vx, u8 vy, u8 vz) const;
 		i32		GetChunkX() const;
 		i32		GetChunkZ() const;
@@ -82,20 +85,25 @@ class	Chunk
 		u32		GetVAO() const;
 		u32		GetIndexCount() const;
 
-		// --- Render ---
+		// --- Methods ---
+
+		bool	IsNeighborVoxel(i8 vx, i8 vy, i8 vz) const;
+		bool	IsSurrounded(u8 vx, u8 vy, u8 vz) const;
+		bool	IsFaceVisible(i8 vx, i8 vy, i8 vz, u8 face) const;
+
+		// --- Meshing --- (ChunkMesh.cpp)
+
+		void	GenerateBuffers();
 		void	GenerateMesh();
 		void	UnbindMesh();
 
-		// --- Methods ---
-		bool	GetNeighborVoxel(i8 x, i8 y, i8 z) const;
-		bool	IsSurrounded(u8 x, u8 y, u8 z) const;
-		bool	IsFaceVisible(i8 x, i8 y, i8 z, u8 dir) const;
+		// --- Generation --- (ChunkGeneration.cpp)
 
-	private:
-		void	GenerateBuffers();
 		void	GenerateVoxels();
 
+	private:
 		// --- Chunk Data ---
+
 		const i32	_chunkX;
 		const i32	_chunkZ;
 
@@ -107,11 +115,9 @@ class	Chunk
 		Chunk		*_westNeighbour = nullptr;
 
 		// --- Chunk Mesh ---
+
 		u32			_vao;
 		u32			_vbo;
 		u32			_ebo;
 		u32			_indexCount;
 };
-
-u32						getFaceTextures(const u8 face, const u32 blockID);
-std::array<float, 24>	getFaceVertices(const u8 vx, const u8 vy, const u8 vz, const u8 face, const u32 blockID);

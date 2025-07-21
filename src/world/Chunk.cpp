@@ -4,10 +4,10 @@
 //    Constructors                                                            //
 // ========================================================================== //
 
-Chunk::Chunk(const i32 x, const i32 z)
-	:	_chunkX(x), _chunkZ(z)
+Chunk::Chunk(const i32 cx, const i32 cz)
+	:	_chunkX(cx), _chunkZ(cz)
 {
-	std::cout << INFO "Chunk " << "X: " << _chunkX << " | Z: " << _chunkZ << " loaded" << std::endl;
+	std::cout << INFO "Chunk " << "X: " << this->_chunkX << " | Z: " << this->_chunkZ << " loaded" RESET << std::endl;
 
 	GenerateBuffers();
 	GenerateVoxels();
@@ -15,54 +15,19 @@ Chunk::Chunk(const i32 x, const i32 z)
 
 Chunk::~Chunk()
 {
-	std::cout << INFO "Chunk " <<
-		"X: " << _chunkX <<
-		" | Z: " << _chunkZ <<
-		" unloaded" RESET << std::endl;
-	if (this->GetNorthNeighbour())
-		this->GetNorthNeighbour()->SetSouthNeighbour(nullptr);
-	if (this->GetSouthNeighbour())
-		this->GetSouthNeighbour()->SetNorthNeighbour(nullptr);
-	if (this->GetEastNeighbour())
-		this->GetEastNeighbour()->SetWestNeighbour(nullptr);
-	if (this->GetWestNeighbour())
-		this->GetWestNeighbour()->SetEastNeighbour(nullptr);
-	this->UnbindMesh();
-}
+	std::cout << INFO "Chunk " << "X: " << this->_chunkX << " | Z: " << this->_chunkZ << " unloaded" RESET << std::endl;
 
-// ========================================================================== //
-//    Init                                                                    //
-// ========================================================================== //
+	// Unlink Neighbours
+	if (GetNorthNeighbour())
+		GetNorthNeighbour()->SetSouthNeighbour(nullptr);
+	if (GetSouthNeighbour())
+		GetSouthNeighbour()->SetNorthNeighbour(nullptr);
+	if (GetEastNeighbour())
+		GetEastNeighbour()->SetWestNeighbour(nullptr);
+	if (GetWestNeighbour())
+		GetWestNeighbour()->SetEastNeighbour(nullptr);
 
-#include <Noises/FastNoiseLite.hpp>
-
-void Chunk::GenerateVoxels()
-{
-	FastNoiseLite	noise;
-
-	noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-	noise.SetFrequency(0.01f);
-	noise.SetSeed(42);
-
-	for (u8 x = 0; x < CHUNK_WIDTH; x++)
-	for (u8 z = 0; z < CHUNK_WIDTH; z++)
-	{
-		i32	worldX = this->_chunkX * CHUNK_WIDTH + x;
-		i32	worldZ = this->_chunkZ * CHUNK_WIDTH + z;
-
-		float	noiseValue = noise.GetNoise(static_cast<float>(worldX), static_cast<float>(worldZ));
-		i32		height = static_cast<i32>((noiseValue + 1) * 0.5f * (CHUNK_HEIGHT - 1));
-
-		for (u8 y = 0; y < CHUNK_HEIGHT; y++)
-		{
-			if (y == height)
-				this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, GRASS_BLOCK);
-			else if (y <= height)
-				this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DIRT_BLOCK);
-			else
-				this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, AIR_BLOCK);
-		}
-	}
+	UnbindMesh();
 }
 
 // ========================================================================== //
@@ -93,277 +58,89 @@ u32		Chunk::GetVAO() const { return (this->_vao); }
 u32		Chunk::GetIndexCount() const { return (this->_indexCount); }
 
 // ========================================================================== //
-//    Render                                                                  //
-// ========================================================================== //
-
-void	Chunk::GenerateBuffers()
-{
-	// VAO (Vertex Array Object)
-	glGenVertexArrays(1, &this->_vao);
-	glBindVertexArray(this->_vao);
-
-	// VBO (Vertex Buffer Object)
-	glGenBuffers(1, &this->_vbo);
-	glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
-
-	// EBO (Element Buffer Object)
-	glGenBuffers(1, &this->_ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_ebo);
-
-	// Position
-	glVertexAttribPointer(
-		0,							// Layout
-		3,							// Size
-		GL_FLOAT,					// Type
-		GL_FALSE,					// Normalized?
-		6 * sizeof(float),			// Stride
-		(void *)0					// Offset
-	);
-	glEnableVertexAttribArray(0);
-
-	// Texture Position
-	glVertexAttribPointer(
-		1,							// Layout
-		2,							// Size
-		GL_FLOAT,					// Type
-		GL_FALSE,					// Normalized?
-		6 * sizeof(float),			// Stride
-		(void *)(3 * sizeof(float))	// Offset
-	);
-	glEnableVertexAttribArray(1);
-
-	// Block ID
-	glVertexAttribPointer(
-		2,							// Layout
-		1,							// Size
-		GL_FLOAT,					// Type
-		GL_FALSE,					// Normalized?
-		6 * sizeof(float),			// Stride
-		(void *)(5 * sizeof(float))	// Offset
-	);
-	glEnableVertexAttribArray(2);
-
-	// Unbind
-	glBindVertexArray(0);
-}
-
-void	Chunk::GenerateMesh()
-{
-	this->UnbindMesh();
-
-	std::vector<float>	vertices;
-	std::vector<u32>	indices;
-	u32					indexOffset = 0;
-
-	for (u8 vx = 0; vx < CHUNK_WIDTH; vx++)
-	for (u8 vy = 0; vy < CHUNK_HEIGHT; vy++)
-	for (u8 vz = 0; vz < CHUNK_WIDTH; vz++)
-	{
-		u32	blockID = GetVoxelID(vx, vy, vz);
-
-		if (blockID == AIR_BLOCK)
-			continue ;
-
-		if (IsSurrounded(vx, vy, vz))
-			continue ;
-
-		for (u8 face = 0; face < 6; face++)
-		{
-			if (!IsFaceVisible(vx, vy, vz, face))
-				continue ;
-
-			u32		textureIndex = getFaceTextures(face, blockID);
-			auto	faceVert = getFaceVertices(vx, vy, vz, face, textureIndex);
-			vertices.insert(vertices.end(), faceVert.begin(), faceVert.end());
-
-			indices.push_back(indexOffset + 0);
-			indices.push_back(indexOffset + 1);
-			indices.push_back(indexOffset + 2);
-			indices.push_back(indexOffset + 2);
-			indices.push_back(indexOffset + 3);
-			indices.push_back(indexOffset + 0);
-
-			indexOffset += 4;
-		}
-	}
-
-	glBindVertexArray(this->_vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), vertices.data(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(u32), indices.data(), GL_STATIC_DRAW);
-
-	this->_indexCount = indices.size();
-
-	glBindVertexArray(0);
-}
-
-u32						getFaceTextures(const u8 face, const u32 blockID)
-{
-	switch (blockID)
-	{
-		case (DIRT_BLOCK):
-			return (DIRT_BLOCK_TEXTURE);
-		case (GRASS_BLOCK):
-			if (face == TOP) return (GRASS_BLOCK_TOP_TEXTURE);
-			if (face == BOTTOM) return (DIRT_BLOCK_TEXTURE);
-			return (GRASS_BLOCK_SIDE_TEXTURE);
-		default:
-			return (DEBUG_BLOCK_TEXTURE);
-	}
-}
-
-std::array<float, 24>	getFaceVertices(const u8 vx, const u8 vy, const u8 vz, const u8 face, const u32 blockID)
-{
-	std::array<float, 24>	verts;
-
-	const float	x = static_cast<float>(vx);
-	const float	y = static_cast<float>(vy);
-	const float	z = static_cast<float>(vz);
-
-	switch (face)
-	{
-		case (RIGHT):
-			verts = {
-				x + 1, y + 0, z + 0, 0, 0, static_cast<float>(blockID),
-				x + 1, y + 1, z + 0, 0, 1, static_cast<float>(blockID),
-				x + 1, y + 1, z + 1, 1, 1, static_cast<float>(blockID),
-				x + 1, y + 0, z + 1, 1, 0, static_cast<float>(blockID)
-			};
-			break ;
-
-		case (LEFT):
-			verts = {
-				x + 0, y + 0, z + 1, 0, 0, static_cast<float>(blockID),
-				x + 0, y + 1, z + 1, 0, 1, static_cast<float>(blockID),
-				x + 0, y + 1, z + 0, 1, 1, static_cast<float>(blockID),
-				x + 0, y + 0, z + 0, 1, 0, static_cast<float>(blockID)
-			};
-			break ;
-
-		case (TOP):
-			verts = {
-				x + 0, y + 1, z + 0, 0, 0, static_cast<float>(blockID),
-				x + 0, y + 1, z + 1, 0, 1, static_cast<float>(blockID),
-				x + 1, y + 1, z + 1, 1, 1, static_cast<float>(blockID),
-				x + 1, y + 1, z + 0, 1, 0, static_cast<float>(blockID)
-			};
-			break ;
-
-		case (BOTTOM):
-			verts = {
-				x + 0, y + 0, z + 1, 0, 0, static_cast<float>(blockID),
-				x + 0, y + 0, z + 0, 0, 1, static_cast<float>(blockID),
-				x + 1, y + 0, z + 0, 1, 1, static_cast<float>(blockID),
-				x + 1, y + 0, z + 1, 1, 0, static_cast<float>(blockID)
-			};
-			break ;
-
-		case (BACK):
-			verts = {
-				x + 0, y + 0, z + 1, 0, 0, static_cast<float>(blockID),
-				x + 1, y + 0, z + 1, 1, 0, static_cast<float>(blockID),
-				x + 1, y + 1, z + 1, 1, 1, static_cast<float>(blockID),
-				x + 0, y + 1, z + 1, 0, 1, static_cast<float>(blockID)
-			};
-			break ;
-
-		case (FRONT):
-			verts = {
-				x + 1, y + 0, z + 0, 0, 0, static_cast<float>(blockID),
-				x + 0, y + 0, z + 0, 1, 0, static_cast<float>(blockID),
-				x + 0, y + 1, z + 0, 1, 1, static_cast<float>(blockID),
-				x + 1, y + 1, z + 0, 0, 1, static_cast<float>(blockID)
-			};
-			break ;
-	}
-
-	return (verts);
-}
-
-void	Chunk::UnbindMesh()
-{
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-}
-
-// ========================================================================== //
 //    Methods                                                                 //
 // ========================================================================== //
 
-bool	Chunk::GetNeighborVoxel(i8 x, i8 y, i8 z) const
+/**
+ * @brief Checks if neighboring voxel is solid
+ * @param vx X Voxel
+ * @param vy Y Voxel
+ * @param vz Z Voxel
+ * @return `True` if the neighbor is solid or out of bounds; `False` if air.
+ */
+bool	Chunk::IsNeighborVoxel(i8 vx, i8 vy, i8 vz) const
 {
 	// Inside current chunk
-	if ((x >= 0 && x < CHUNK_WIDTH)
-		&& y >= 0 && y < CHUNK_HEIGHT
-		&& z >= 0 && z < CHUNK_WIDTH)
+	if (vx >= 0 && vx < CHUNK_WIDTH && vy >= 0 && vy < CHUNK_HEIGHT && vz >= 0 && vz < CHUNK_WIDTH)
 	{
-		if (GetVoxelID(x, y, z) == AIR_BLOCK)
+		if (GetVoxelID(vx, vy, vz) == AIR_BLOCK)
 			return (false);
 		return (true);
 	}
 
 	// Outside current chunk
-	if (x < 0 && !this->_westNeighbour)
+	if (vx < 0 && !this->_westNeighbour)
 		return (true);
+	if (vx < 0 && this->_westNeighbour)
+		return (this->_westNeighbour->IsNeighborVoxel(vx + CHUNK_WIDTH, vy, vz));
 
-	if (x < 0 && this->_westNeighbour)
-		return (this->_westNeighbour->GetNeighborVoxel(x + CHUNK_WIDTH, y, z));
-
-	if (x >= CHUNK_WIDTH && !this->_eastNeighbour)
+	if (vx >= CHUNK_WIDTH && !this->_eastNeighbour)
 		return(true);
+	if (vx >= CHUNK_WIDTH && this->_eastNeighbour)
+		return (this->_eastNeighbour->IsNeighborVoxel(vx - CHUNK_WIDTH, vy, vz));
 
-	if (x >= CHUNK_WIDTH && this->_eastNeighbour)
-		return (this->_eastNeighbour->GetNeighborVoxel(x - CHUNK_WIDTH, y, z));
-
-	if (z < 0 && !this->_northNeighbour)
+	if (vz < 0 && !this->_northNeighbour)
 		return (true);
+	if (vz < 0 && this->_northNeighbour)
+		return (this->_northNeighbour->IsNeighborVoxel(vx, vy, vz + CHUNK_WIDTH));
 
-	if (z < 0 && this->_northNeighbour)
-		return (this->_northNeighbour->GetNeighborVoxel(x, y, z + CHUNK_WIDTH));
-
-	if (z >= CHUNK_WIDTH && !this->_southNeighbour)
+	if (vz >= CHUNK_WIDTH && !this->_southNeighbour)
 		return (true);
+	if (vz >= CHUNK_WIDTH && this->_southNeighbour)
+		return (this->_southNeighbour->IsNeighborVoxel(vx, vy, vz - CHUNK_WIDTH));
 
-	if (z >= CHUNK_WIDTH && this->_southNeighbour)
-		return (this->_southNeighbour->GetNeighborVoxel(x, y, z - CHUNK_WIDTH));
-
-	// Missing neighbor or vertical
-	return (0);
+	return (true);
 }
 
-bool Chunk::IsSurrounded(u8 x, u8 y, u8 z) const
+/**
+ * @brief Checks if a block is completely surrounded by other blocks.
+ * @param vx X Voxel
+ * @param vy Y Voxel
+ * @param vz Z Voxel
+ * @return `True` if surrounded on all 6 sides; `False` otherwise.
+ */
+bool Chunk::IsSurrounded(u8 vx, u8 vy, u8 vz) const
 {
-	// Check top/bottom boundaries
-	if (y == 0 || y == CHUNK_HEIGHT - 1)
-		return (false);
-
 	// Check all six neighbors
-	return ((!this->GetWestNeighbour() || GetNeighborVoxel(x - 1, y, z))	// Left = West
-		&& (!this->GetEastNeighbour() || GetNeighborVoxel(x + 1, y, z))	// Right = East
-		&& GetNeighborVoxel(x, y - 1, z)	// Bottom
-		&& GetNeighborVoxel(x, y + 1, z)	// Top
-		&& (!this->GetNorthNeighbour() || GetNeighborVoxel(x, y, z - 1))	// Front = North
-		&& (!this->GetSouthNeighbour() || GetNeighborVoxel(x, y, z + 1))	// Back = South
+	return ((!GetWestNeighbour() || IsNeighborVoxel(vx - 1, vy, vz))	// Left = West
+		&& (!GetEastNeighbour() || IsNeighborVoxel(vx + 1, vy, vz))	// Right = East
+		&& IsNeighborVoxel(vx, vy - 1, vz)								// Bottom
+		&& IsNeighborVoxel(vx, vy + 1, vz)								// Top
+		&& (!GetNorthNeighbour() || IsNeighborVoxel(vx, vy, vz - 1))	// Front = North
+		&& (!GetSouthNeighbour() || IsNeighborVoxel(vx, vy, vz + 1))	// Back = South
 	);
 }
 
-bool	Chunk::IsFaceVisible(i8 x, i8 y, i8 z, u8 dir) const
+/**
+ * @brief Check if a specific face of a block should be rendered.
+ * @param vx X Voxel
+ * @param vy Y Voxel
+ * @param vz Z Voxel
+ * @return `True` if face is visible; `False` otherwise.
+ */
+bool	Chunk::IsFaceVisible(i8 vx, i8 vy, i8 vz, u8 face) const
 {
 	// Get neighbor coordinates
-	switch (dir)
+	switch (face)
 	{
-		case (0): x++; break ;
-		case (1): x--; break ;
-		case (2): y++; break ;
-		case (3): y--; break ;
-		case (4): z++; break ;
-		case (5): z--; break ;
+		case (0): vx++; break ;
+		case (1): vx--; break ;
+		case (2): vy++; break ;
+		case (3): vy--; break ;
+		case (4): vz++; break ;
+		case (5): vz--; break ;
 	}
 
 	// Check neighbor
-	return (GetNeighborVoxel(x, y, z) == 0);
+	return (!IsNeighborVoxel(vx, vy, vz));
 }
