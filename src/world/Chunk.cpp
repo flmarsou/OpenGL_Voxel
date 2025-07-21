@@ -310,7 +310,7 @@ bool	Chunk::GetNeighborVoxel(i8 x, i8 y, i8 z) const
 	if (z < 0 && this->_northNeighbour)
 		return (this->_northNeighbour->GetNeighborVoxel(x, y, z + CHUNK_WIDTH));
 
-	if (z >= CHUNK_WIDTH && !this->_northNeighbour)
+	if (z >= CHUNK_WIDTH && !this->_southNeighbour)
 		return (true);
 
 	if (z >= CHUNK_WIDTH && this->_southNeighbour)
