@@ -65,7 +65,7 @@ class	Chunk
 		~Chunk();
 
 		// --- Setters & Getters ---
-		u32		GetVoxel(u8 x, u8 y, u8 z) const;
+		u32		GetVoxelID(u8 vx, u8 vy, u8 vz) const;
 		i32		GetChunkX() const;
 		i32		GetChunkZ() const;
 
@@ -87,7 +87,7 @@ class	Chunk
 		void	UnbindMesh();
 
 		// --- Methods ---
-		u32		GetNeighborVoxel(i8 x, i8 y, i8 z) const;
+		bool	GetNeighborVoxel(i8 x, i8 y, i8 z) const;
 		bool	IsSurrounded(u8 x, u8 y, u8 z) const;
 		bool	IsFaceVisible(i8 x, i8 y, i8 z, u8 dir) const;
 

@@ -34,16 +34,35 @@ Chunk::~Chunk()
 //    Init                                                                    //
 // ========================================================================== //
 
+#include <Noises/FastNoiseLite.hpp>
+
 void Chunk::GenerateVoxels()
 {
+	FastNoiseLite	noise;
+
+	noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
+	noise.SetFrequency(0.01f);
+	noise.SetSeed(42);
+
 	for (u8 x = 0; x < CHUNK_WIDTH; x++)
-	for (u8 y = 0; y < CHUNK_HEIGHT; y++)
 	for (u8 z = 0; z < CHUNK_WIDTH; z++)
 	{
-		if (y == CHUNK_HEIGHT - 1 && x == CHUNK_WIDTH / 2 && z == CHUNK_WIDTH / 2)
-			this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DEBUG_BLOCK);
-		else
-			this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DIRT_BLOCK);
+		i32	worldX = this->_chunkX * CHUNK_WIDTH + x;
+		i32	worldZ = this->_chunkZ * CHUNK_WIDTH + z;
+
+		float	noiseValue = noise.GetNoise(static_cast<float>(worldX), static_cast<float>(worldZ));
+		i32		height = static_cast<i32>((noiseValue + 1) * (CHUNK_HEIGHT - 1));
+
+		for (u8 y = 0; y < CHUNK_HEIGHT; y++)
+		{
+			if (y <= height)
+				if (x == CHUNK_WIDTH / 2 && z == CHUNK_WIDTH / 2)
+					this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DEBUG_BLOCK);
+				else
+					this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DIRT_BLOCK);
+			else
+				this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, AIR_BLOCK);
+		}
 	}
 }
 
@@ -51,7 +70,12 @@ void Chunk::GenerateVoxels()
 //    Setters & Getters                                                       //
 // ========================================================================== //
 
-u32		Chunk::GetVoxel(u8 x, u8 y, u8 z) const { return (this->_voxels[VOXEL_INDEX(x, y, z)]); }
+u32		Chunk::GetVoxelID(u8 vx, u8 vy, u8 vz) const
+{
+	u32	blockID;
+	BitShiftVoxel::UnpackBlockID(this->_voxels[VOXEL_INDEX(vx, vy, vz)], blockID);
+	return (blockID);
+}
 
 i32		Chunk::GetChunkX() const { return (this->_chunkX); }
 i32		Chunk::GetChunkZ() const { return (this->_chunkZ); }
@@ -136,19 +160,20 @@ void	Chunk::GenerateMesh()
 	for (u8 vy = 0; vy < CHUNK_HEIGHT; vy++)
 	for (u8 vz = 0; vz < CHUNK_WIDTH; vz++)
 	{
-		if (IsSurrounded(vx, vy, vz))
+		u32	blockID = GetVoxelID(vx, vy, vz);
+
+		if (blockID == AIR_BLOCK)
 			continue ;
 
-		u32	voxel = GetVoxel(vx, vy, vz);
-		u32	blockID;
-		BitShiftVoxel::UnpackBlockID(voxel, blockID);
+		if (IsSurrounded(vx, vy, vz))
+			continue ;
 
 		for (u8 face = 0; face < 6; face++)
 		{
 			if (!IsFaceVisible(vx, vy, vz, face))
 				continue ;
 
-			auto	faceVert = getFaceVertices(vx, vy, vz, face, blockID);
+			auto	faceVert = getFaceVertices(vx, vy, vz, face, blockID - 1);
 			vertices.insert(vertices.end(), faceVert.begin(), faceVert.end());
 
 			indices.push_back(indexOffset + 0);
@@ -187,55 +212,55 @@ std::array<float, 24>	getFaceVertices(const u8 vx, const u8 vy, const u8 vz, con
 	{
 		case (RIGHT):
 			verts = {
-				x + 1, y + 0, z + 0, 0, 0, (float)blockID,
-				x + 1, y + 1, z + 0, 0, 1, (float)blockID,
-				x + 1, y + 1, z + 1, 1, 1, (float)blockID,
-				x + 1, y + 0, z + 1, 1, 0, (float)blockID
+				x + 1, y + 0, z + 0, 0, 0, static_cast<float>(blockID),
+				x + 1, y + 1, z + 0, 0, 1, static_cast<float>(blockID),
+				x + 1, y + 1, z + 1, 1, 1, static_cast<float>(blockID),
+				x + 1, y + 0, z + 1, 1, 0, static_cast<float>(blockID)
 			};
 			break ;
 
 		case (LEFT):
 			verts = {
-				x + 0, y + 0, z + 1, 0, 0, (float)blockID,
-				x + 0, y + 1, z + 1, 0, 1, (float)blockID,
-				x + 0, y + 1, z + 0, 1, 1, (float)blockID,
-				x + 0, y + 0, z + 0, 1, 0, (float)blockID
+				x + 0, y + 0, z + 1, 0, 0, static_cast<float>(blockID),
+				x + 0, y + 1, z + 1, 0, 1, static_cast<float>(blockID),
+				x + 0, y + 1, z + 0, 1, 1, static_cast<float>(blockID),
+				x + 0, y + 0, z + 0, 1, 0, static_cast<float>(blockID)
 			};
 			break ;
 
 		case (TOP):
 			verts = {
-				x + 0, y + 1, z + 0, 0, 0, (float)blockID,
-				x + 0, y + 1, z + 1, 0, 1, (float)blockID,
-				x + 1, y + 1, z + 1, 1, 1, (float)blockID,
-				x + 1, y + 1, z + 0, 1, 0, (float)blockID
+				x + 0, y + 1, z + 0, 0, 0, static_cast<float>(blockID),
+				x + 0, y + 1, z + 1, 0, 1, static_cast<float>(blockID),
+				x + 1, y + 1, z + 1, 1, 1, static_cast<float>(blockID),
+				x + 1, y + 1, z + 0, 1, 0, static_cast<float>(blockID)
 			};
 			break ;
 
 		case (BOTTOM):
 			verts = {
-				x + 0, y + 0, z + 1, 0, 0, (float)blockID,
-				x + 0, y + 0, z + 0, 0, 1, (float)blockID,
-				x + 1, y + 0, z + 0, 1, 1, (float)blockID,
-				x + 1, y + 0, z + 1, 1, 0, (float)blockID
+				x + 0, y + 0, z + 1, 0, 0, static_cast<float>(blockID),
+				x + 0, y + 0, z + 0, 0, 1, static_cast<float>(blockID),
+				x + 1, y + 0, z + 0, 1, 1, static_cast<float>(blockID),
+				x + 1, y + 0, z + 1, 1, 0, static_cast<float>(blockID)
 			};
 			break ;
 
 		case (BACK):
 			verts = {
-				x + 0, y + 0, z + 1, 0, 0, (float)blockID,
-				x + 1, y + 0, z + 1, 1, 0, (float)blockID,
-				x + 1, y + 1, z + 1, 1, 1, (float)blockID,
-				x + 0, y + 1, z + 1, 0, 1, (float)blockID
+				x + 0, y + 0, z + 1, 0, 0, static_cast<float>(blockID),
+				x + 1, y + 0, z + 1, 1, 0, static_cast<float>(blockID),
+				x + 1, y + 1, z + 1, 1, 1, static_cast<float>(blockID),
+				x + 0, y + 1, z + 1, 0, 1, static_cast<float>(blockID)
 			};
 			break ;
 
 		case (FRONT):
 			verts = {
-				x + 1, y + 0, z + 0, 0, 0, (float)blockID,
-				x + 0, y + 0, z + 0, 1, 0, (float)blockID,
-				x + 0, y + 1, z + 0, 1, 1, (float)blockID,
-				x + 1, y + 1, z + 0, 0, 1, (float)blockID
+				x + 1, y + 0, z + 0, 0, 0, static_cast<float>(blockID),
+				x + 0, y + 0, z + 0, 1, 0, static_cast<float>(blockID),
+				x + 0, y + 1, z + 0, 1, 1, static_cast<float>(blockID),
+				x + 1, y + 1, z + 0, 0, 1, static_cast<float>(blockID)
 			};
 			break ;
 	}
@@ -254,13 +279,17 @@ void	Chunk::UnbindMesh()
 //    Methods                                                                 //
 // ========================================================================== //
 
-u32		Chunk::GetNeighborVoxel(i8 x, i8 y, i8 z) const
+bool	Chunk::GetNeighborVoxel(i8 x, i8 y, i8 z) const
 {
 	// Inside current chunk
 	if ((x >= 0 && x < CHUNK_WIDTH)
 		&& y >= 0 && y < CHUNK_HEIGHT
 		&& z >= 0 && z < CHUNK_WIDTH)
-		return (GetVoxel(x, y, z));
+	{
+		if (GetVoxelID(x, y, z) == AIR_BLOCK)
+			return (false);
+		return (true);
+	}
 
 	// Outside current chunk
 	if (x < 0 && !this->_westNeighbour)
