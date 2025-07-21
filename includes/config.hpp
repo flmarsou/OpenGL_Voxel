@@ -12,8 +12,8 @@
 # define RESET		"\e[0m"
 
 // --- Window ---
-# define WINDOW_WIDTH	1280
-# define WINDOW_HEIGHT	720
+# define WINDOW_WIDTH	1480
+# define WINDOW_HEIGHT	920
 # define WINDOW_TITLE	"Voxel Game"
 
 // --- Shader Files ---
@@ -21,15 +21,26 @@
 # define VOXEL_FRAGMENT_PATH	"../shaders/voxelFragment.glsl"
 
 // --- Textures ---
-# define DEBUG_BLOCK_PATH	"../assets/debug_block.png"
-# define DIRT_BLOCK_PATH	"../assets/dirt_block.png"
+# define DEBUG_BLOCK_PATH		"../assets/debug_block.png"
+# define DIRT_BLOCK_PATH		"../assets/dirt_block.png"
+# define GRASS_BLOCK_TOP_PATH	"../assets/grass_block_top.png"
+# define GRASS_BLOCK_SIDE_PATH	"../assets/grass_block_side.png"
 
-// --- Texture Enum ---
-enum	TextureID
+// --- Block Enums ---
+enum	BlockIDs
 {
 	AIR_BLOCK,
 	DIRT_BLOCK,
+	GRASS_BLOCK,
 	DEBUG_BLOCK,
+};
+
+enum	TextureIDs
+{
+	DIRT_BLOCK_TEXTURE,
+	GRASS_BLOCK_TOP_TEXTURE,
+	GRASS_BLOCK_SIDE_TEXTURE,
+	DEBUG_BLOCK_TEXTURE,
 };
 
 // --- Camera Settings ---
