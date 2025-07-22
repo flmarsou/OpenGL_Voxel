@@ -32,11 +32,11 @@ void	Chunk::GenerateVoxels()
 		for (u8 y = 0; y < CHUNK_HEIGHT; y++)
 		{
 			if (y == height)
-				this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, GRASS_BLOCK);
+				this->_voxels[VOXEL_INDEX(x, y, z)] = GRASS_BLOCK;
 			else if (y <= height)
-				this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, DIRT_BLOCK);
+				this->_voxels[VOXEL_INDEX(x, y, z)] = DIRT_BLOCK;
 			else
-				this->_voxels[VOXEL_INDEX(x, y, z)] = BitShiftVoxel::Pack(x, y, z, AIR_BLOCK);
+				this->_voxels[VOXEL_INDEX(x, y, z)] = AIR_BLOCK;
 		}
 	}
 }

@@ -1,12 +1,12 @@
 #version 460 core
 
-out vec4	fragmentColor;
+in	vec3	TexCoord;
 
-in	vec3	texCoord;
+out vec4	fragmentColor;
 
 uniform	sampler2DArray	texArray;
 
 void	main()
 {
-	fragmentColor = texture(texArray, texCoord);
+	fragmentColor = texture(texArray, TexCoord);
 }
