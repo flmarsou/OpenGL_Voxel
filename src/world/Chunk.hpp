@@ -21,23 +21,16 @@ enum	VoxelFaces
 
 struct	BitShiftVoxel
 {
-	// [- - - - - - - b b b b b b b b b b z z z z z y y y y y x x x x x]
-	static u32	Pack(u8 x, u8 y, u8 z, u32 blockID)
+	// [- - - - b b b b b b b b b b f f f z z z z z y y y y y x x x x x]
+	static u32	Pack(u8 x, u8 y, u8 z, u8 face, u16 blockID)
 	{
-		return ((blockID & 0x3FF) << 15 | (z & 0x1F) << 10 | (y & 0x1F) << 5 | (x & 0x1F));
-	}
-
-	static void	Unpack(u32 data, u8 &x, u8 &y, u8 &z, u32 &blockID)
-	{
-		x = (data) & 0x1F;
-		y = (data >> 5) & 0x1F;
-		z = (data >> 10) & 0x1F;
-		blockID = (data >> 15) & 0x3FF;
-	}
-
-	static void	UnpackBlockID(u32 data, u32 &blockID)
-	{
-		blockID = (data >> 15) & 0x3FF;
+		return (
+			(blockID & 0x3FF) << 18 |
+			(face & 0x7) << 15 |
+			(z & 0x1F) << 10 |
+			(y & 0x1F) << 5 |
+			(x & 0x1F)
+		);
 	}
 };
 
@@ -68,7 +61,7 @@ class	Chunk
 
 		// --- Setters & Getters ---
 
-		u32		GetVoxelID(u8 vx, u8 vy, u8 vz) const;
+		u32		GetVoxel(u8 vx, u8 vy, u8 vz) const;
 		i32		GetChunkX() const;
 		i32		GetChunkZ() const;
 
@@ -95,7 +88,6 @@ class	Chunk
 
 		void	GenerateBuffers();
 		void	GenerateMesh();
-		void	UnbindMesh();
 
 		// --- Generation --- (ChunkGeneration.cpp)
 
@@ -107,7 +99,7 @@ class	Chunk
 		const i32	_chunkX;
 		const i32	_chunkZ;
 
-		u32			_voxels[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
+		u16			_voxels[CHUNK_WIDTH * CHUNK_HEIGHT * CHUNK_WIDTH];
 
 		Chunk		*_northNeighbour = nullptr;
 		Chunk		*_southNeighbour = nullptr;
