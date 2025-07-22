@@ -27,19 +27,22 @@ Chunk::~Chunk()
 	if (GetWestNeighbour())
 		GetWestNeighbour()->SetEastNeighbour(nullptr);
 
-	UnbindMesh();
+	// Unbind
+	glBindVertexArray(0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	// Delete
+	glDeleteBuffers(1, &this->_vbo);
+	glDeleteBuffers(1, &this->_ebo);
+	glDeleteVertexArrays(1, &this->_vao);
 }
 
 // ========================================================================== //
 //    Setters & Getters                                                       //
 // ========================================================================== //
 
-u32		Chunk::GetVoxelID(u8 vx, u8 vy, u8 vz) const
-{
-	u32	blockID;
-	BitShiftVoxel::UnpackBlockID(this->_voxels[VOXEL_INDEX(vx, vy, vz)], blockID);
-	return (blockID);
-}
+u32		Chunk::GetVoxel(u8 vx, u8 vy, u8 vz) const { return (this->_voxels[VOXEL_INDEX(vx, vy, vz)]); }
 
 i32		Chunk::GetChunkX() const { return (this->_chunkX); }
 i32		Chunk::GetChunkZ() const { return (this->_chunkZ); }
@@ -73,7 +76,7 @@ bool	Chunk::IsNeighborVoxel(i8 vx, i8 vy, i8 vz) const
 	// Inside current chunk
 	if (vx >= 0 && vx < CHUNK_WIDTH && vy >= 0 && vy < CHUNK_HEIGHT && vz >= 0 && vz < CHUNK_WIDTH)
 	{
-		if (GetVoxelID(vx, vy, vz) == AIR_BLOCK)
+		if (GetVoxel(vx, vy, vz) == AIR_BLOCK)
 			return (false);
 		return (true);
 	}
