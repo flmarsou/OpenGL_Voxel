@@ -27,7 +27,7 @@ class	Camera
 		void	Init(const u32 width, const u32 height, const glm::vec3 pos);
 
 		// --- Methods ---
-		void	Matrix(float nearPlane, float farPlane, u32 shader, const char *uniform);
+		void	Matrix(u32 shader, const char *uniform);
 		void	Input(GLFWwindow *window);
 
 		// --- Getters ---
@@ -46,6 +46,8 @@ class	Camera
 
 	private:
 		u8		_facing;
+		const float	_nearPlane = 0.1f;
+		const float	_farPlane = 1000.0f;
 		float	_yaw = 0.0f;
 		float	_pitch = -90.0f;
 };

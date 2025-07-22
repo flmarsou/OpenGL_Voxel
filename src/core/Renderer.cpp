@@ -37,7 +37,7 @@ void	Renderer::Render(GLFWwindow *win)
 {
 	// --- Camera ---
 	this->_camera.Input(win);
-	this->_camera.Matrix(0.1f, 500.0f, this->_voxelShader.program, "uCamera");
+	this->_camera.Matrix(this->_voxelShader.program, "uCamera");
 	this->_frustum.ExtractPlanes(this->_camera.Proj * this->_camera.View);
 
 	// --- Chunk Reloading ---

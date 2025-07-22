@@ -24,7 +24,7 @@ u8		Camera::GetFacingDirection() const
 //    Methods                                                                 //
 // ========================================================================== //
 
-void	Camera::Matrix(float nearPlane, float farPlane, u32 shader, const char *uniform)
+void	Camera::Matrix(u32 shader, const char *uniform)
 {
 	this->View = glm::lookAt(
 		this->Position,
@@ -35,8 +35,8 @@ void	Camera::Matrix(float nearPlane, float farPlane, u32 shader, const char *uni
 	this->Proj = glm::perspective(
 		glm::radians(CAMERA_FOV),
 		this->width / this->height,
-		nearPlane,
-		farPlane
+		this->_nearPlane,
+		this->_farPlane
 	);
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, uniform), 1, GL_FALSE, glm::value_ptr(this->Proj * this->View));
