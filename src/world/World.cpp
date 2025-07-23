@@ -44,7 +44,7 @@ void	World::Reload(const i32 playerX, const i32 playerZ)
 		i32	currentZ = playerZ + offsetZ;
 		u64	currentChunkKey = BitShiftChunk::Pack(currentX, currentZ);
 
-		if (this->chunks.find(currentChunkKey) == nullptr)
+		if (this->chunks.find(currentChunkKey) == this->chunks.end())
 		{
 			if (isLoad(playerX, playerZ, currentX, currentZ, radius))
 			{

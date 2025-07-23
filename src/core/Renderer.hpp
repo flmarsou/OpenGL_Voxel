@@ -90,7 +90,6 @@ class	Renderer
 		void	Init();
 
 		void	Render(GLFWwindow *win);
-		void	PrintStatistics();
 
 		void	Cleanup();
 
