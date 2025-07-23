@@ -56,6 +56,10 @@ enum	TextureIDs
 
 // --- World ---
 # define RENDER_DISTANCE	10
+
 # define CHUNK_WIDTH		32
 # define CHUNK_HEIGHT		32
+# define SUBCHUNK_AMOUNT	4
+# define WORLD_HEIGHT		CHUNK_HEIGHT * SUBCHUNK_AMOUNT
+
 # define SEED				42
