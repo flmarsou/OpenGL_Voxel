@@ -1,6 +1,6 @@
 #include "World.hpp"
 
-static bool	isLoad(const i32 playerX, const i32 playerZ, const i32 currentX, const i32 currentZ, const i32 radius);
+static bool	isLoad(const i32 playerX, const i32 playerZ, const i32 chunkX, const i32 chunkZ, const i32 radius);
 
 // ========================================================================== //
 //    Load                                                                    //
@@ -10,82 +10,98 @@ void	World::Load(const i32 playerX, const i32 playerZ)
 {
 	const i32	radius = RENDER_DISTANCE / 2;
 
+	std::vector<u64>	loadedChunkKey;
+
+	// 1. Create chunks
 	for (i32 offsetZ = -radius; offsetZ <= radius; offsetZ++)
+	for (i32 offsetX = -radius; offsetX <= radius; offsetX++)
 	{
-		for (i32 offsetX = -radius; offsetX <= radius; offsetX++)
-		{
-			i32	currentX = playerX + offsetX;
-			i32	currentZ = playerZ + offsetZ;
+		i32	chunkX = playerX + offsetX;
+		i32	chunkZ = playerZ + offsetZ;
 
-			if (!isLoad(playerX, playerZ, currentX, currentZ, radius))
-				continue ;
+		if (!isLoad(playerX, playerZ, chunkX, chunkZ, radius))
+			continue ;
 
-			// Create chunk
-			u64	currentChunkKey = BitShiftChunk::Pack(currentX, currentZ);
-			this->chunks[currentChunkKey] = new Chunk(currentX, currentZ);
+		u64	currentChunkKey = BitShiftChunk::Pack(chunkX, chunkZ);
+		this->chunks[currentChunkKey] = new Chunk(chunkX, chunkZ);
 
-			SetNeighbors(currentX, currentZ, currentChunkKey);
-		}
+		loadedChunkKey.push_back(currentChunkKey);
 	}
-	for (auto &chunk : this->chunks)
+
+	// 2. Set neighbors
+	for (u64 key : loadedChunkKey)
 	{
-		chunk.second->GenerateMesh();
+		i32	chunkX;
+		i32	chunkZ;
+
+		BitShiftChunk::Unpack(key, chunkX, chunkZ);
+		SetNeighbors(chunkX, chunkZ, key);
 	}
-}
 
-void	World::Reload(const i32 playerX, const i32 playerZ)
-{
-	const i32	radius = RENDER_DISTANCE / 2;
-
-	for (i32 offsetZ = -radius - 1; offsetZ <= radius + 1; offsetZ++)
-	for (i32 offsetX = -radius - 1; offsetX <= radius + 1; offsetX++)
+	// 3. Generate meshes
+	for (u64 key : loadedChunkKey)
 	{
-		i32	currentX = playerX + offsetX;
-		i32	currentZ = playerZ + offsetZ;
-		u64	currentChunkKey = BitShiftChunk::Pack(currentX, currentZ);
-
-		if (this->chunks.find(currentChunkKey) == this->chunks.end())
+		for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
 		{
-			if (isLoad(playerX, playerZ, currentX, currentZ, radius))
-			{
-				this->chunks[currentChunkKey] = new Chunk(currentX, currentZ);
-				this->SetNeighbors(currentX, currentZ, currentChunkKey);
-
-				this->chunks[currentChunkKey]->GenerateMesh();
-
-				if (this->chunks[currentChunkKey]->GetNorthNeighbour())
-					this->chunks[currentChunkKey]->GetNorthNeighbour()->GenerateMesh();
-				if (this->chunks[currentChunkKey]->GetSouthNeighbour())
-					this->chunks[currentChunkKey]->GetSouthNeighbour()->GenerateMesh();
-				if (this->chunks[currentChunkKey]->GetEastNeighbour())
-					this->chunks[currentChunkKey]->GetEastNeighbour()->GenerateMesh();
-				if (this->chunks[currentChunkKey]->GetWestNeighbour())
-					this->chunks[currentChunkKey]->GetWestNeighbour()->GenerateMesh();
-			}
-		}
-		else
-		{
-			if (!isLoad(playerX, playerZ, currentX, currentZ, radius))
-			{
-				delete this->chunks[currentChunkKey];
-				this->chunks.erase(currentChunkKey);
-			}
+			this->chunks[key]->subChunks[chunkY]->GenerateBuffers();
+			this->chunks[key]->subChunks[chunkY]->GenerateMesh();
 		}
 	}
 }
+
+// void	World::Reload(const i32 playerX, const i32 playerZ)
+// {
+// 	const i32	radius = RENDER_DISTANCE / 2;
+
+// 	for (i32 offsetZ = -radius - 1; offsetZ <= radius + 1; offsetZ++)
+// 	for (i32 offsetX = -radius - 1; offsetX <= radius + 1; offsetX++)
+// 	{
+// 		i32	chunkX = playerX + offsetX;
+// 		i32	chunkZ = playerZ + offsetZ;
+// 		u64	currentChunkKey = BitShiftChunk::Pack(chunkX, chunkZ);
+
+// 		if (this->chunks.find(currentChunkKey) == this->chunks.end())
+// 		{
+// 			if (isLoad(playerX, playerZ, chunkX, chunkZ, radius))
+// 			{
+// 				this->chunks[currentChunkKey] = new Chunk(chunkX, chunkZ);
+// 				this->SetNeighbors(chunkX, chunkZ, currentChunkKey);
+
+// 				this->chunks[currentChunkKey]->GenerateMesh();
+
+// 				if (this->chunks[currentChunkKey]->GetNorthNeighbour())
+// 					this->chunks[currentChunkKey]->GetNorthNeighbour()->GenerateMesh();
+// 				if (this->chunks[currentChunkKey]->GetSouthNeighbour())
+// 					this->chunks[currentChunkKey]->GetSouthNeighbour()->GenerateMesh();
+// 				if (this->chunks[currentChunkKey]->GetEastNeighbour())
+// 					this->chunks[currentChunkKey]->GetEastNeighbour()->GenerateMesh();
+// 				if (this->chunks[currentChunkKey]->GetWestNeighbour())
+// 					this->chunks[currentChunkKey]->GetWestNeighbour()->GenerateMesh();
+// 			}
+// 		}
+// 		else
+// 		{
+// 			if (!isLoad(playerX, playerZ, chunkX, chunkZ, radius))
+// 			{
+// 				delete this->chunks[currentChunkKey];
+// 				this->chunks.erase(currentChunkKey);
+// 			}
+// 		}
+// 	}
+// }
 
 // ========================================================================== //
 //    Methods                                                                 //
 // ========================================================================== //
 
-void	World::SetNeighbors(const i32 currentX, const i32 currentZ, const u64 currentChunkKey)
+void	World::SetNeighbors(const i32 chunkX, const i32 chunkZ, const u64 chunkKey)
 {
-	Chunk	*currentChunk = this->chunks[currentChunkKey];
+	Chunk	*currentChunk = this->chunks[chunkKey];
 
-	const u64	northChunkKey = BitShiftChunk::Pack(currentX, currentZ - 1);
-	const u64	southChunkKey = BitShiftChunk::Pack(currentX, currentZ + 1);
-	const u64	eastChunkKey = BitShiftChunk::Pack(currentX + 1, currentZ);
-	const u64	westChunkKey = BitShiftChunk::Pack(currentX - 1, currentZ);
+	const u64	northChunkKey = BitShiftChunk::Pack(chunkX, chunkZ - 1);
+	const u64	southChunkKey = BitShiftChunk::Pack(chunkX, chunkZ + 1);
+	const u64	eastChunkKey = BitShiftChunk::Pack(chunkX + 1, chunkZ);
+	const u64	westChunkKey = BitShiftChunk::Pack(chunkX - 1, chunkZ);
 
 	if (this->chunks.find(northChunkKey) != this->chunks.end())
 	{
@@ -124,9 +140,9 @@ void	World::SetNeighbors(const i32 currentX, const i32 currentZ, const u64 curre
 //    Helper Functions                                                        //
 // ========================================================================== //
 
-static bool	isLoad(const i32 playerX, const i32 playerZ, const i32 currentX, const i32 currentZ, const i32 radius)
+static bool	isLoad(const i32 playerX, const i32 playerZ, const i32 chunkX, const i32 chunkZ, const i32 radius)
 {
-	i32	dx = currentX - playerX;
-	i32	dy = currentZ - playerZ;
+	i32	dx = chunkX - playerX;
+	i32	dy = chunkZ - playerZ;
 	return (dx * dx + dy * dy <= radius * radius);
 }
