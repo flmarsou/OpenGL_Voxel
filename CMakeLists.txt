@@ -20,11 +20,8 @@ add_executable(${CMAKE_PROJECT_NAME}
 
 	src/world/World.cpp
 
-	src/world/chunk/Chunk.cpp
-	src/world/chunk/ChunkMesh.cpp
-	src/world/chunk/ChunkGeneration.cpp
-
-	src/world/chunk/subchunk/SubChunk.cpp
+	src/world/Chunk.cpp
+	src/world/SubChunk.cpp
 )
 
 # Header Files
@@ -34,8 +31,6 @@ target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
 	${CMAKE_SOURCE_DIR}/src/core
 	${CMAKE_SOURCE_DIR}/src/gfx
 	${CMAKE_SOURCE_DIR}/src/world
-	${CMAKE_SOURCE_DIR}/src/world/chunk
-	${CMAKE_SOURCE_DIR}/src/world/chunk/subchunk
 )
 
 # Link Libraries
