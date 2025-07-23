@@ -26,7 +26,9 @@ void	Renderer::Init()
 	this->_texture.Bind();
 
 	// --- Camera ---
-	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(static_cast<float>(CHUNK_WIDTH / 2), 45, static_cast<float>(CHUNK_WIDTH / 2)));
+	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16, 100, 100));
+
+	this->_world.Load(0, 0);
 }
 
 // ========================================================================== //
@@ -41,49 +43,57 @@ void	Renderer::Render(GLFWwindow *win)
 	this->_frustum.ExtractPlanes(this->_camera.Proj * this->_camera.View);
 
 	// --- Chunk Reloading ---
-	static float	prevX = roundf(this->_camera.Position.x);
-	static float	prevZ = roundf(this->_camera.Position.z);
-	i32				save[2];
+	// static float	prevX = roundf(this->_camera.Position.x);
+	// static float	prevZ = roundf(this->_camera.Position.z);
+	// i32				save[2];
 
-	if (this->_camera.Position.x < 0)
-		save[0] = static_cast<i32>(((this->_camera.Position.x) / CHUNK_WIDTH) - 1);
-	else
-		save[0] = static_cast<i32>(this->_camera.Position.x) / CHUNK_WIDTH;
-	if (this->_camera.Position.z < 0)
-		save[1] = static_cast<i32>(((this->_camera.Position.z) / CHUNK_WIDTH) - 1);
-	else
-		save[1] = static_cast<i32>(this->_camera.Position.z) / CHUNK_WIDTH;
+	// if (this->_camera.Position.x < 0)
+	// 	save[0] = static_cast<i32>(((this->_camera.Position.x) / CHUNK_WIDTH) - 1);
+	// else
+	// 	save[0] = static_cast<i32>(this->_camera.Position.x) / CHUNK_WIDTH;
+	// if (this->_camera.Position.z < 0)
+	// 	save[1] = static_cast<i32>(((this->_camera.Position.z) / CHUNK_WIDTH) - 1);
+	// else
+	// 	save[1] = static_cast<i32>(this->_camera.Position.z) / CHUNK_WIDTH;
 
-	// West or East
-	if (prevX != save[0])
-	{
-		prevX = save[0];
-		this->_world.Reload(save[0], save[1]);
-	}
-	// North or South
-	else if (prevZ != save[1])
-	{
-		prevZ = save[1];
-		this->_world.Reload(save[0], save[1]);
-	}
+	// // West or East
+	// if (prevX != save[0])
+	// {
+	// 	prevX = save[0];
+	// 	this->_world.Reload(save[0], save[1]);
+	// }
+	// // North or South
+	// else if (prevZ != save[1])
+	// {
+	// 	prevZ = save[1];
+	// 	this->_world.Reload(save[0], save[1]);
+	// }
 
 	// --- Chunks Rendering ---
-	for (auto &chunk : this->_world.chunks)
+	for (auto &chunkPair : this->_world.chunks)
 	{
-		i32	chunkX = chunk.second->GetChunkX() * CHUNK_WIDTH;
-		i32	chunkZ = chunk.second->GetChunkZ() * CHUNK_WIDTH;
+		Chunk	*chunk = chunkPair.second;
+		i32	chunkX = chunk->GetChunkX() * CHUNK_WIDTH;
+		i32	chunkZ = chunk->GetChunkZ() * CHUNK_WIDTH;
 
-		glm::vec3	min = glm::vec3(chunkX, 0, chunkZ);
-		glm::vec3	max = min + glm::vec3(CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH);
+		for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
+		{
+			SubChunk	*subChunk = chunk->subChunks[chunkY];
+			if (!subChunk)
+				continue ;
 
-		if (!this->_frustum.IsChunkVisible(min, max))
-			continue ;
+			glm::vec3	min = glm::vec3(chunkX, chunkY * CHUNK_HEIGHT, chunkZ);
+			glm::vec3	max = min + glm::vec3(CHUNK_WIDTH, CHUNK_HEIGHT, CHUNK_WIDTH);
 
-		glm::mat4 model = glm::translate(glm::mat4(1.0f), glm::vec3(chunkX, 0, chunkZ));
-		glUniformMatrix4fv(glGetUniformLocation(_voxelShader.program, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
+			if (!this->_frustum.IsChunkVisible(min, max))
+				continue ;
 
-		glBindVertexArray(chunk.second->GetVAO());
-		glDrawElements(GL_TRIANGLES, chunk.second->GetIndexCount(), GL_UNSIGNED_INT, 0);
+			glm::mat4 model = glm::translate(glm::mat4(1.0f), min);
+			glUniformMatrix4fv(glGetUniformLocation(_voxelShader.program, "uModel"), 1, GL_FALSE, glm::value_ptr(model));
+
+			glBindVertexArray(subChunk->GetVAO());
+			glDrawElements(GL_TRIANGLES, subChunk->GetIndexCount(), GL_UNSIGNED_INT, 0);
+		}
 	}
 }
 
