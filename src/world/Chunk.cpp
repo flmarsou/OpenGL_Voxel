@@ -11,12 +11,7 @@ Chunk::Chunk(const i32 cx, const i32 cz)
 
 	// Create SubChunks
 	for (u8 i = 0; i < SUBCHUNK_AMOUNT; i++)
-	{
 		this->subChunks[i] = new SubChunk(this, i);
-		this->subChunks[i]->GenerateVoxels();
-		this->subChunks[i]->GenerateBuffers();
-		this->subChunks[i]->GenerateMesh();
-	}
 }
 
 Chunk::~Chunk()

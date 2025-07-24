@@ -43,6 +43,7 @@ void	World::Load(const i32 playerX, const i32 playerZ)
 	{
 		for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
 		{
+			this->chunks[key]->subChunks[chunkY]->GenerateVoxels();
 			this->chunks[key]->subChunks[chunkY]->GenerateBuffers();
 			this->chunks[key]->subChunks[chunkY]->GenerateMesh();
 		}
