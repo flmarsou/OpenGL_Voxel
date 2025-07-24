@@ -8,13 +8,13 @@ struct	BitShiftChunk
 {
 	static u64	Pack(i32 chunkX, i32 chunkZ)
 	{
-		return ((u64)((u32)(chunkX)) << 32) | (u32)(chunkZ);
+		return (static_cast<u64>(chunkX) << 32) | (static_cast<u32>(chunkZ));
 	}
 
 	static void	Unpack(u64 data, i32 &chunkX, i32 &chunkZ)
 	{
-		chunkZ = (i32)(data & 0xFFFFFFFF);
-		chunkX = (i32)(data >> 32);
+		chunkX = static_cast<i32>(data >> 32);
+		chunkZ = static_cast<i32>(data & 0xFFFFFFFF);
 	}
 };
 
@@ -43,6 +43,8 @@ class	Chunk
 		Chunk	*GetEastNeighbour() const;
 		Chunk	*GetWestNeighbour() const;
 
+		// --- SubChunks ---
+
 		SubChunk	*subChunks[SUBCHUNK_AMOUNT];
 
 	private:
@@ -50,7 +52,6 @@ class	Chunk
 
 		const i32	_chunkX;
 		const i32	_chunkZ;
-
 
 		Chunk		*_northNeighbour = nullptr;
 		Chunk		*_southNeighbour = nullptr;
