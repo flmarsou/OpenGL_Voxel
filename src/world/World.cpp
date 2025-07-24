@@ -12,7 +12,7 @@ void	World::Load(const i32 playerX, const i32 playerZ)
 
 	std::vector<u64>	loadedChunkKey;
 
-	// 1. Create chunks
+	// 1. Create chunks + Generate SubChunks Voxels
 	for (i32 offsetZ = -radius; offsetZ <= radius; offsetZ++)
 	for (i32 offsetX = -radius; offsetX <= radius; offsetX++)
 	{
@@ -26,6 +26,9 @@ void	World::Load(const i32 playerX, const i32 playerZ)
 		this->chunks[currentChunkKey] = new Chunk(chunkX, chunkZ);
 
 		loadedChunkKey.push_back(currentChunkKey);
+
+		for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
+			this->chunks[currentChunkKey]->subChunks[chunkY]->GenerateVoxels();
 	}
 
 	// 2. Set neighbors
@@ -38,15 +41,12 @@ void	World::Load(const i32 playerX, const i32 playerZ)
 		SetNeighbors(chunkX, chunkZ, key);
 	}
 
-	// 3. Generate meshes
+	// 3. Generate buffers + meshes
 	for (u64 key : loadedChunkKey)
+	for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
 	{
-		for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
-		{
-			this->chunks[key]->subChunks[chunkY]->GenerateVoxels();
-			this->chunks[key]->subChunks[chunkY]->GenerateBuffers();
-			this->chunks[key]->subChunks[chunkY]->GenerateMesh();
-		}
+		this->chunks[key]->subChunks[chunkY]->GenerateBuffers();
+		this->chunks[key]->subChunks[chunkY]->GenerateMesh();
 	}
 }
 
@@ -107,7 +107,6 @@ void	World::SetNeighbors(const i32 chunkX, const i32 chunkZ, const u64 chunkKey)
 	if (this->chunks.find(northChunkKey) != this->chunks.end())
 	{
 		Chunk	*northChunk = this->chunks[northChunkKey];
-
 		currentChunk->SetNorthNeighbour(northChunk);
 		northChunk->SetSouthNeighbour(currentChunk);
 	}
@@ -115,7 +114,6 @@ void	World::SetNeighbors(const i32 chunkX, const i32 chunkZ, const u64 chunkKey)
 	if (this->chunks.find(southChunkKey) != this->chunks.end())
 	{
 		Chunk	*southChunk = this->chunks[southChunkKey];
-
 		currentChunk->SetSouthNeighbour(southChunk);
 		southChunk->SetNorthNeighbour(currentChunk);
 	}
@@ -123,7 +121,6 @@ void	World::SetNeighbors(const i32 chunkX, const i32 chunkZ, const u64 chunkKey)
 	if (this->chunks.find(eastChunkKey) != this->chunks.end())
 	{
 		Chunk	*eastChunk = this->chunks[eastChunkKey];
-
 		currentChunk->SetEastNeighbour(eastChunk);
 		eastChunk->SetWestNeighbour(currentChunk);
 	}
@@ -131,7 +128,6 @@ void	World::SetNeighbors(const i32 chunkX, const i32 chunkZ, const u64 chunkKey)
 	if (this->chunks.find(westChunkKey) != this->chunks.end())
 	{
 		Chunk	*westChunk = this->chunks[westChunkKey];
-
 		currentChunk->SetWestNeighbour(westChunk);
 		westChunk->SetEastNeighbour(currentChunk);
 	}
