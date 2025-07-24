@@ -13,8 +13,8 @@ struct	BitShiftChunk
 
 	static void	Unpack(u64 data, i32 &chunkX, i32 &chunkZ)
 	{
-		chunkX = (i32)(data & 0xFFFFFFFF);
-		chunkZ = (i32)(data >> 32);
+		chunkZ = (i32)(data & 0xFFFFFFFF);
+		chunkX = (i32)(data >> 32);
 	}
 };
 
