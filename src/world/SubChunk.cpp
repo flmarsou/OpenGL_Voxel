@@ -97,6 +97,9 @@ void	SubChunk::GenerateMesh()
 
 		for (u8 face = 0; face < 6; face++)
 		{
+			if (!IsFaceVisible(vx, vy, vz, face))
+				continue ;
+
 			for (u8 i = 0; i < 4; i++)
 				vertices.push_back(BitShiftVoxel::Pack(vx, vy, vz, face, getFaceTexture(face, GetVoxel(vx, vy, vz))));
 
@@ -136,6 +139,21 @@ bool	SubChunk::IsSurrounded(const u8 voxelX, const u8 voxelY, const u8 voxelZ) c
 			!IsNeighborVoxelAir(voxelX, voxelY - 1, voxelZ) &&
 			!IsNeighborVoxelAir(voxelX, voxelY, voxelZ + 1) &&
 			!IsNeighborVoxelAir(voxelX, voxelY, voxelZ - 1));
+}
+
+bool	SubChunk::IsFaceVisible(i8 voxelX, i8 voxelY, i8 voxelZ, const u8 face) const
+{
+	switch (face)
+	{
+		case (RIGHT): voxelX++; break ;
+		case (LEFT): voxelX--; break ;
+		case (TOP): voxelY++; break ;
+		case (BOTTOM): voxelY--; break ;
+		case (BACK): voxelZ++; break ;
+		case (FRONT): voxelZ--; break ;
+	}
+
+	return (IsNeighborVoxelAir(voxelX, voxelY, voxelZ));
 }
 
 bool	SubChunk::IsNeighborVoxelAir(const i8 neighborX, const i8 neighborY, const i8 neighborZ) const
