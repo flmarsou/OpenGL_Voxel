@@ -61,7 +61,7 @@ class	SubChunk
 
 		// --- Helper Methods ---
 		bool	IsSurrounded(const u8 voxelX, const u8 voxelY, const u8 voxelZ) const;
-		u16		GetNeighborVoxel(const i8 neighborX, const i8 neighborY, const i8 neighborZ) const;
+		bool	IsNeighborVoxelAir(const i8 neighborX, const i8 neighborY, const i8 neighborZ) const;
 
 		// --- Generation ---
 		void	GenerateVoxels();

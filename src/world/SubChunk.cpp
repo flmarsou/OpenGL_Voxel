@@ -7,7 +7,7 @@
 SubChunk::SubChunk(Chunk *parent, const i32 subChunkY)
 	:	_parent(parent), _subChunkY(subChunkY)
 {
-	std::cout << "-> SubChunk Y: " << this->_subChunkY << " loaded" RESET << std::endl;
+	// std::cout << "-> SubChunk Y: " << this->_subChunkY << " loaded" RESET << std::endl;
 }
 
 SubChunk::~SubChunk()
@@ -22,7 +22,7 @@ SubChunk::~SubChunk()
 	glDeleteBuffers(1, &this->_ebo);
 	glDeleteVertexArrays(1, &this->_vao);
 
-	std::cout << "-> SubChunk Y: " << this->_subChunkY << " unloaded" RESET << std::endl;
+	// std::cout << "-> SubChunk Y: " << this->_subChunkY << " unloaded" RESET << std::endl;
 }
 
 // ========================================================================== //
@@ -130,25 +130,60 @@ void	SubChunk::GenerateMesh()
 
 bool	SubChunk::IsSurrounded(const u8 voxelX, const u8 voxelY, const u8 voxelZ) const
 {
-	return (GetNeighborVoxel(voxelX + 1, voxelY, voxelZ) != AIR_BLOCK &&
-			GetNeighborVoxel(voxelX - 1, voxelY, voxelZ) != AIR_BLOCK &&
-			GetNeighborVoxel(voxelX, voxelY + 1, voxelZ) != AIR_BLOCK &&
-			GetNeighborVoxel(voxelX, voxelY - 1, voxelZ) != AIR_BLOCK &&
-			GetNeighborVoxel(voxelX, voxelY, voxelZ + 1) != AIR_BLOCK &&
-			GetNeighborVoxel(voxelX, voxelY, voxelZ - 1) != AIR_BLOCK);
+	return (!IsNeighborVoxelAir(voxelX + 1, voxelY, voxelZ) &&
+			!IsNeighborVoxelAir(voxelX - 1, voxelY, voxelZ) &&
+			!IsNeighborVoxelAir(voxelX, voxelY + 1, voxelZ) &&
+			!IsNeighborVoxelAir(voxelX, voxelY - 1, voxelZ) &&
+			!IsNeighborVoxelAir(voxelX, voxelY, voxelZ + 1) &&
+			!IsNeighborVoxelAir(voxelX, voxelY, voxelZ - 1));
 }
 
-u16 SubChunk::GetNeighborVoxel(const i8 neighborX, const i8 neighborY, const i8 neighborZ) const
+bool	SubChunk::IsNeighborVoxelAir(const i8 neighborX, const i8 neighborY, const i8 neighborZ) const
 {
     // --- Inside current subchunk ---
     if (neighborX >= 0 && neighborX < CHUNK_WIDTH &&
         neighborY >= 0 && neighborY < CHUNK_HEIGHT &&
         neighborZ >= 0 && neighborZ < CHUNK_WIDTH)
-        return GetVoxel(neighborX, neighborY, neighborZ);
+        return (GetVoxel(neighborX, neighborY, neighborZ) == AIR_BLOCK);
 
-	// ! Need to add in-between chunks and out-of-bound checks here
+	// --- Outside current subchunk ---
+	auto	checkNeighborChunk = [&](Chunk *chunk, int x, int y, int z)
+	{
+		if (chunk)
+			return (chunk->subChunks[this->_subChunkY]->GetVoxel(x, y, z) == AIR_BLOCK);
+		return (false);
+	};
 
-	return (AIR_BLOCK);
+	// --- Handle X Overflow ---
+	if (neighborX < 0)
+		return (checkNeighborChunk(this->_parent->GetWestNeighbour(), CHUNK_WIDTH - 1, neighborY, neighborZ));
+	if (neighborX >= CHUNK_WIDTH)
+		return (checkNeighborChunk(this->_parent->GetEastNeighbour(), 0, neighborY, neighborZ));
+
+	// --- Handle Z Overflow ---
+	if (neighborZ < 0)
+		return (checkNeighborChunk(this->_parent->GetNorthNeighbour(), neighborX, neighborY, CHUNK_WIDTH - 1));
+	if (neighborZ >= CHUNK_WIDTH)
+		return (checkNeighborChunk(this->_parent->GetSouthNeighbour(), neighborX, neighborY, 0));
+
+	// --- Handle Y Overflow ---
+	if (neighborY < 0)
+	{
+		i32	subChunkIndex = this->_subChunkY - 1;
+		if (subChunkIndex >= 0)
+			return (this->_parent->subChunks[subChunkIndex]->GetVoxel(neighborX, CHUNK_HEIGHT - 1, neighborZ) == AIR_BLOCK);
+		return (false);	// Below world: treat as void
+	}
+
+	if (neighborY >= CHUNK_HEIGHT)
+	{
+		i32	subChunkIndex = this->_subChunkY + 1;
+		if (subChunkIndex < SUBCHUNK_AMOUNT)
+			return (this->_parent->subChunks[subChunkIndex]->GetVoxel(neighborX, 0, neighborZ) == AIR_BLOCK);
+		return (true);	// Above world: treat as air
+	}
+
+	return (true);
 }
 
 
