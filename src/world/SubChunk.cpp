@@ -131,6 +131,13 @@ void	SubChunk::GenerateMesh()
 //    Helper Methods                                                          //
 // ========================================================================== //
 
+/**
+ * @brief 
+ * @param voxelX Current Voxel X
+ * @param voxelY Current Voxel Y
+ * @param voxelZ Current Voxel Z
+ * @return `true` if current voxel is surrounded by solid voxels; `false` otherwise.
+ */
 bool	SubChunk::IsSurrounded(const u8 voxelX, const u8 voxelY, const u8 voxelZ) const
 {
 	return (!IsNeighborVoxelAir(voxelX + 1, voxelY, voxelZ) &&
@@ -141,6 +148,14 @@ bool	SubChunk::IsSurrounded(const u8 voxelX, const u8 voxelY, const u8 voxelZ) c
 			!IsNeighborVoxelAir(voxelX, voxelY, voxelZ - 1));
 }
 
+/**
+ * @brief 
+ * @param voxelX Current Voxel X
+ * @param voxelY Current Voxel Y
+ * @param voxelZ Current Voxel Z
+ * @param face Face to check
+ * @return `true` if current voxel's face is covered by a solid voxel; `false` otherwise.
+ */
 bool	SubChunk::IsFaceVisible(i8 voxelX, i8 voxelY, i8 voxelZ, const u8 face) const
 {
 	switch (face)
@@ -156,6 +171,15 @@ bool	SubChunk::IsFaceVisible(i8 voxelX, i8 voxelY, i8 voxelZ, const u8 face) con
 	return (IsNeighborVoxelAir(voxelX, voxelY, voxelZ));
 }
 
+/**
+ * @brief Only works for offsets of +1 or -1 in each direction starting from the chunk of origin.
+ * @param neighborX X Voxel to look at
+ * @param neighborY Y Voxel to look at
+ * @param neighborZ Z Voxel to look at
+ * @return `true` if neighboring voxel is an `AIR_BLOCK`, or if the neighbor is above the world (treated as air);
+ * 
+ * `false` if the neighboring voxel is solid, or if the neighbor is below the world (treated as void).
+ */
 bool	SubChunk::IsNeighborVoxelAir(const i8 neighborX, const i8 neighborY, const i8 neighborZ) const
 {
     // --- Inside current subchunk ---
@@ -165,7 +189,7 @@ bool	SubChunk::IsNeighborVoxelAir(const i8 neighborX, const i8 neighborY, const 
         return (GetVoxel(neighborX, neighborY, neighborZ) == AIR_BLOCK);
 
 	// --- Outside current subchunk ---
-	auto	checkNeighborChunk = [&](Chunk *chunk, int x, int y, int z)
+	auto	checkNeighborChunk = [this](Chunk *chunk, int x, int y, int z)
 	{
 		if (chunk)
 			return (chunk->subChunks[this->_subChunkY]->GetVoxel(x, y, z) == AIR_BLOCK);
@@ -192,7 +216,6 @@ bool	SubChunk::IsNeighborVoxelAir(const i8 neighborX, const i8 neighborY, const 
 			return (this->_parent->subChunks[subChunkIndex]->GetVoxel(neighborX, CHUNK_HEIGHT - 1, neighborZ) == AIR_BLOCK);
 		return (false);	// Below world: treat as void
 	}
-
 	if (neighborY >= CHUNK_HEIGHT)
 	{
 		i32	subChunkIndex = this->_subChunkY + 1;
@@ -203,7 +226,6 @@ bool	SubChunk::IsNeighborVoxelAir(const i8 neighborX, const i8 neighborY, const 
 
 	return (true);
 }
-
 
 // ========================================================================== //
 //    Helper Functions                                                        //
