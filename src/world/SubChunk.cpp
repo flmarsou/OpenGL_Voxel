@@ -4,7 +4,7 @@
 //    Constructors                                                            //
 // ========================================================================== //
 
-SubChunk::SubChunk(const Chunk *parent, const i32 subChunkY)
+SubChunk::SubChunk(Chunk *parent, const i32 subChunkY)
 	:	_parent(parent), _subChunkY(subChunkY)
 {
 	std::cout << "-> SubChunk Y: " << this->_subChunkY << " loaded" RESET << std::endl;
@@ -130,17 +130,25 @@ void	SubChunk::GenerateMesh()
 
 bool	SubChunk::IsSurrounded(const u8 voxelX, const u8 voxelY, const u8 voxelZ) const
 {
-	// Inside Chunk
-	if (voxelX > 0 && voxelX < CHUNK_WIDTH - 1
-		&& voxelY > 0 && voxelY < CHUNK_HEIGHT - 1
-		&& voxelZ > 0 && voxelZ < CHUNK_WIDTH - 1)
-	{
-		return (GetVoxel(voxelX + 1, voxelY, voxelZ) && GetVoxel(voxelX - 1, voxelY, voxelZ) &&
-				GetVoxel(voxelX, voxelY + 1, voxelZ) && GetVoxel(voxelX, voxelY - 1, voxelZ) &&
-				GetVoxel(voxelX, voxelY, voxelZ + 1) && GetVoxel(voxelX, voxelY, voxelZ - 1));
-	}
+	return (GetNeighborVoxel(voxelX + 1, voxelY, voxelZ) != AIR_BLOCK &&
+			GetNeighborVoxel(voxelX - 1, voxelY, voxelZ) != AIR_BLOCK &&
+			GetNeighborVoxel(voxelX, voxelY + 1, voxelZ) != AIR_BLOCK &&
+			GetNeighborVoxel(voxelX, voxelY - 1, voxelZ) != AIR_BLOCK &&
+			GetNeighborVoxel(voxelX, voxelY, voxelZ + 1) != AIR_BLOCK &&
+			GetNeighborVoxel(voxelX, voxelY, voxelZ - 1) != AIR_BLOCK);
+}
 
-	return (false);
+u16 SubChunk::GetNeighborVoxel(const i8 neighborX, const i8 neighborY, const i8 neighborZ) const
+{
+    // --- Inside current subchunk ---
+    if (neighborX >= 0 && neighborX < CHUNK_WIDTH &&
+        neighborY >= 0 && neighborY < CHUNK_HEIGHT &&
+        neighborZ >= 0 && neighborZ < CHUNK_WIDTH)
+        return GetVoxel(neighborX, neighborY, neighborZ);
+
+	// ! Need to add in-between chunks and out-of-bound checks here
+
+	return (AIR_BLOCK);
 }
 
 
