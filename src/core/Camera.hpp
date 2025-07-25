@@ -45,9 +45,9 @@ class	Camera
 		float		height;
 
 	private:
-		u8		_facing;
+		u8			_facing;
 		const float	_nearPlane = 0.1f;
 		const float	_farPlane = 1000.0f;
-		float	_yaw = 0.0f;
-		float	_pitch = -90.0f;
+		float		_yaw = 0.0f;
+		float		_pitch = -90.0f;
 };
