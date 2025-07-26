@@ -22,11 +22,12 @@ void	World::Load(const i32 playerX, const i32 playerZ)
 		if (!isLoad(playerX, playerZ, chunkX, chunkZ, radius))
 			continue ;
 
+		// Create the chunk
 		u64	currentChunkKey = BitShiftChunk::Pack(chunkX, chunkZ);
 		this->chunks[currentChunkKey] = new Chunk(chunkX, chunkZ);
-
 		loadedChunkKey.push_back(currentChunkKey);
 
+		// Create the subChunks
 		for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
 			this->chunks[currentChunkKey]->subChunks[chunkY]->GenerateVoxels();
 	}
@@ -54,7 +55,8 @@ void	World::Reload(const i32 playerX, const i32 playerZ)
 {
 	const i32	radius = RENDER_DISTANCE / 2;
 
-	std::vector<u64>	newLoadedChunkKey;
+	std::vector<u64>			newLoadedChunkKey;
+	std::unordered_set<Chunk *>	chunksToUpdate;
 
 	// 1. Load new chunks and unload old ones
 	for (i32 offsetZ = -radius - 1; offsetZ <= radius + 1; offsetZ++)
@@ -66,7 +68,7 @@ void	World::Reload(const i32 playerX, const i32 playerZ)
 
 		auto	it = this->chunks.find(currentChunkKey);
 
-		// Unload old chunks
+		// --- Unload old chunks ---
 		if (it != this->chunks.end())
 		{
 			if (!isLoad(playerX, playerZ, chunkX, chunkZ, radius))
@@ -75,15 +77,16 @@ void	World::Reload(const i32 playerX, const i32 playerZ)
 				this->chunks.erase(currentChunkKey);
 			}
 		}
-		// Load new chunks
+		// --- Load new chunks ---
 		else if (it == this->chunks.end())
 		{
 			if (isLoad(playerX, playerZ, chunkX, chunkZ, radius))
 			{
+				// Create the chunk
 				this->chunks[currentChunkKey] = new Chunk(chunkX, chunkZ);
-
 				newLoadedChunkKey.push_back(currentChunkKey);
 
+				// Create the subChunks
 				for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
 					this->chunks[currentChunkKey]->subChunks[chunkY]->GenerateVoxels();
 			}
@@ -98,6 +101,17 @@ void	World::Reload(const i32 playerX, const i32 playerZ)
 
 		BitShiftChunk::Unpack(key, chunkX, chunkZ);
 		SetNeighbors(chunkX, chunkZ, key);
+
+		// Chunks to update
+		Chunk	*currentChunk = this->chunks[key];
+		if (currentChunk->GetNorthNeighbour())
+			chunksToUpdate.insert(currentChunk->GetNorthNeighbour());
+		if (currentChunk->GetSouthNeighbour())
+			chunksToUpdate.insert(currentChunk->GetSouthNeighbour());
+		if (currentChunk->GetEastNeighbour())
+			chunksToUpdate.insert(currentChunk->GetEastNeighbour());
+		if (currentChunk->GetWestNeighbour())
+			chunksToUpdate.insert(currentChunk->GetWestNeighbour());
 	}
 
 	// 3. Generate buffers + meshes for newly loaded chunks
@@ -108,7 +122,10 @@ void	World::Reload(const i32 playerX, const i32 playerZ)
 		this->chunks[key]->subChunks[chunkY]->GenerateMesh();
 	}
 
-	// TODO 4. Refresh meshes for neighbors of nearly loaded chunks
+	// 4. Reload buffers + meshes of neighboring chunks of newly loaded chunks
+	for (Chunk *chunk : chunksToUpdate)
+	for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
+		chunk->subChunks[chunkY]->ReloadMesh();
 }
 
 // ========================================================================== //
