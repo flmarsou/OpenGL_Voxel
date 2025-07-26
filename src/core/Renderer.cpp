@@ -43,30 +43,27 @@ void	Renderer::Render(GLFWwindow *win)
 	this->_frustum.ExtractPlanes(this->_camera.Proj * this->_camera.View);
 
 	// --- Chunk Reloading ---
-	static float	prevX = roundf(this->_camera.Position.x);
-	static float	prevZ = roundf(this->_camera.Position.z);
-	i32				save[2];
+	static i32	prevChunkX = 0;
+	static i32	prevChunkZ = 0;
+
+	i32			currentChunkX;
+	i32			currentChunkZ;
 
 	if (this->_camera.Position.x < 0)
-		save[0] = static_cast<i32>(((this->_camera.Position.x) / CHUNK_WIDTH) - 1);
+		currentChunkX = static_cast<i32>(this->_camera.Position.x) / CHUNK_WIDTH - 1;
 	else
-		save[0] = static_cast<i32>(this->_camera.Position.x) / CHUNK_WIDTH;
-	if (this->_camera.Position.z < 0)
-		save[1] = static_cast<i32>(((this->_camera.Position.z) / CHUNK_WIDTH) - 1);
-	else
-		save[1] = static_cast<i32>(this->_camera.Position.z) / CHUNK_WIDTH;
+		currentChunkX = static_cast<i32>(this->_camera.Position.x) / CHUNK_WIDTH;
 
-	// West or East
-	if (prevX != save[0])
+	if (this->_camera.Position.z < 0)
+		currentChunkZ = static_cast<i32>(this->_camera.Position.z) / CHUNK_WIDTH - 1;
+	else
+		currentChunkZ = static_cast<i32>(this->_camera.Position.z) / CHUNK_WIDTH;
+
+	if (currentChunkX != prevChunkX || currentChunkZ != prevChunkZ)
 	{
-		prevX = save[0];
-		this->_world.Reload(save[0], save[1]);
-	}
-	// North or South
-	else if (prevZ != save[1])
-	{
-		prevZ = save[1];
-		this->_world.Reload(save[0], save[1]);
+		prevChunkX = currentChunkX;
+		prevChunkZ = currentChunkZ;
+		this->_world.Reload(currentChunkX, currentChunkZ);
 	}
 
 	// --- Chunks Rendering ---
