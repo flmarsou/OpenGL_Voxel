@@ -4,20 +4,6 @@
 
 # include "SubChunk.hpp"
 
-struct	BitShiftChunk
-{
-	static u64	Pack(i32 chunkX, i32 chunkZ)
-	{
-		return (static_cast<u64>(chunkX) << 32) | (static_cast<u32>(chunkZ));
-	}
-
-	static void	Unpack(u64 data, i32 &chunkX, i32 &chunkZ)
-	{
-		chunkX = static_cast<i32>(data >> 32);
-		chunkZ = static_cast<i32>(data & 0xFFFFFFFF);
-	}
-};
-
 class	SubChunk;
 
 class	Chunk
