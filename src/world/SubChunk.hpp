@@ -58,6 +58,7 @@ class	SubChunk
 		// --- Mesh ---
 		void	GenerateBuffers();
 		void	GenerateMesh();
+		void	ReloadMesh();
 
 		// --- Helper Methods ---
 		bool	IsSurrounded(const u8 voxelX, const u8 voxelY, const u8 voxelZ) const;

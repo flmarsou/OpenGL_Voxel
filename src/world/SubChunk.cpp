@@ -127,6 +127,22 @@ void	SubChunk::GenerateMesh()
 	glBindVertexArray(0);
 }
 
+/**
+ * @brief Deletes old buffers to recreate them with an entirely new mesh.
+ */
+void	SubChunk::ReloadMesh()
+{
+	if (this->_vbo)
+		glDeleteBuffers(1, &this->_vbo);
+	if (this->_ebo)
+		glDeleteBuffers(1, &this->_ebo);
+	if (this->_vao)
+		glDeleteVertexArrays(1, &this->_vao);
+
+	GenerateBuffers();
+	GenerateMesh();
+}
+
 // ========================================================================== //
 //    Helper Methods                                                          //
 // ========================================================================== //
