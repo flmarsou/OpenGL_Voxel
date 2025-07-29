@@ -24,10 +24,14 @@ struct	BitShiftChunk
 class World
 {
 	public:
-		void	Load(const i32 playerX, const i32 playerZ);
+		World() : _pool(std::thread::hardware_concurrency()) {}
+
 		void	Reload(const i32 playerX, const i32 playerZ);
 
 		void	SetNeighbors(const i32 chunkX, const i32 chunkZ, const u64 chunkKey);
 
 		std::unordered_map<u64, Chunk *>	chunks;
+
+	private:
+		ThreadPool	_pool;
 };
