@@ -7,7 +7,7 @@
 Chunk::Chunk(const i32 cx, const i32 cz)
 	:	_chunkX(cx), _chunkZ(cz)
 {
-	std::cout << INFO "Chunk " << "X: " << this->_chunkX << " | Z: " << this->_chunkZ << " loaded" RESET << std::endl;
+	// std::cout << INFO "Chunk " << "X: " << this->_chunkX << " | Z: " << this->_chunkZ << " loaded" RESET << std::endl;
 
 	// Create SubChunks
 	for (u8 i = 0; i < SUBCHUNK_AMOUNT; i++)
@@ -16,7 +16,7 @@ Chunk::Chunk(const i32 cx, const i32 cz)
 
 Chunk::~Chunk()
 {
-	std::cout << INFO "Chunk " << "X: " << this->_chunkX << " | Z: " << this->_chunkZ << " unloaded" RESET << std::endl;
+	// std::cout << INFO "Chunk " << "X: " << this->_chunkX << " | Z: " << this->_chunkZ << " unloaded" RESET << std::endl;
 
 	// Unlink Neighbours
 	if (GetNorthNeighbour())
