@@ -45,10 +45,7 @@ void	World::Load(const i32 playerX, const i32 playerZ)
 	// 3. Generate buffers + meshes
 	for (u64 key : loadedChunkKey)
 	for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
-	{
-		this->chunks[key]->subChunks[chunkY]->GenerateBuffers();
 		this->chunks[key]->subChunks[chunkY]->GenerateMesh();
-	}
 }
 
 void	World::Reload(const i32 playerX, const i32 playerZ)
@@ -117,10 +114,7 @@ void	World::Reload(const i32 playerX, const i32 playerZ)
 	// 3. Generate buffers + meshes for newly loaded chunks
 	for (u64 key : newLoadedChunkKey)
 	for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
-	{
-		this->chunks[key]->subChunks[chunkY]->GenerateBuffers();
 		this->chunks[key]->subChunks[chunkY]->GenerateMesh();
-	}
 
 	// 4. Reload buffers + meshes of neighboring chunks of newly loaded chunks
 	for (Chunk *chunk : chunksToUpdate)

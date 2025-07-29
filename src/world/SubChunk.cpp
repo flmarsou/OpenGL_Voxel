@@ -8,6 +8,8 @@ SubChunk::SubChunk(Chunk *parent, const i32 subChunkY)
 	:	_parent(parent), _subChunkY(subChunkY)
 {
 	// std::cout << "-> SubChunk Y: " << this->_subChunkY << " loaded" RESET << std::endl;
+
+	GenerateBuffers();
 }
 
 SubChunk::~SubChunk()
