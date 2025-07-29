@@ -28,7 +28,7 @@ void	Renderer::Init()
 	// --- Camera ---
 	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16, 100, 16));
 
-	this->_world.Load(0, 0);
+	this->_world.Reload(0, 0);
 }
 
 // ========================================================================== //
