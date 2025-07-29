@@ -2,6 +2,7 @@
 
 # include "config.hpp"
 # include "Chunk.hpp"
+# include "ThreadPool.hpp"
 
 # include <GLAD/glad.h>
 # include <Noises/FastNoiseLite.hpp>
@@ -57,8 +58,9 @@ class	SubChunk
 
 		// --- Mesh ---
 		void	GenerateBuffers();
-		void	GenerateMesh();
-		void	ReloadMesh();
+
+		void	GenerateMeshData();
+		void	UploadMeshToGPU();
 
 		// --- Helper Methods ---
 		bool	IsSurrounded(const u8 voxelX, const u8 voxelY, const u8 voxelZ) const;
@@ -69,6 +71,7 @@ class	SubChunk
 		void	GenerateVoxels();
 
 	private:
+		// --- Data ---
 		Chunk		*_parent;
 		const i32	_subChunkY;
 
@@ -78,4 +81,10 @@ class	SubChunk
 		u32			_vbo;
 		u32			_ebo;
 		u32			_indexCount;
+
+		// --- Thread ---
+		std::vector<u32>	_pendingVertices;
+		std::vector<u32>	_pendingIndices;
+		std::mutex			_meshDataMutex;
+		std::atomic<bool>	_hasPendingUpload = false;
 };

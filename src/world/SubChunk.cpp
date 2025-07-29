@@ -8,8 +8,6 @@ SubChunk::SubChunk(Chunk *parent, const i32 subChunkY)
 	:	_parent(parent), _subChunkY(subChunkY)
 {
 	// std::cout << "-> SubChunk Y: " << this->_subChunkY << " loaded" RESET << std::endl;
-
-	GenerateBuffers();
 }
 
 SubChunk::~SubChunk()
@@ -81,7 +79,7 @@ void	SubChunk::GenerateBuffers()
  * 
  * - Skip if faces are covered
  */
-void	SubChunk::GenerateMesh()
+void	SubChunk::GenerateMeshData()
 {
 	std::vector<u32>	vertices;
 	std::vector<u32>	indices;
@@ -116,6 +114,41 @@ void	SubChunk::GenerateMesh()
 		}
 	}
 
+	{
+		std::lock_guard<std::mutex>	lock(this->_meshDataMutex);
+		this->_pendingVertices = std::move(vertices);
+		this->_pendingIndices = std::move(indices);
+	}
+
+	this->_hasPendingUpload = true;
+}
+
+void	SubChunk::UploadMeshToGPU()
+{
+	if (!this->_hasPendingUpload)
+		return ;
+
+	std::vector<u32>	vertices;
+	std::vector<u32>	indices;
+
+	{
+		std::lock_guard<std::mutex>	lock(this->_meshDataMutex);
+		vertices = std::move(this->_pendingVertices);
+		indices = std::move(this->_pendingIndices);
+		this->_pendingVertices.clear();
+		this->_pendingIndices.clear();
+	}
+	this->_hasPendingUpload = false;
+
+	if (this->_vbo)
+		glDeleteBuffers(1, &this->_vbo);
+	if (this->_ebo)
+		glDeleteBuffers(1, &this->_ebo);
+	if (this->_vao)
+		glDeleteVertexArrays(1, &this->_vao);
+
+	GenerateBuffers();
+
 	glBindVertexArray(this->_vao);
 
 	glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
@@ -127,22 +160,6 @@ void	SubChunk::GenerateMesh()
 	this->_indexCount = indices.size();
 
 	glBindVertexArray(0);
-}
-
-/**
- * @brief Deletes old buffers to recreate them with an entirely new mesh.
- */
-void	SubChunk::ReloadMesh()
-{
-	if (this->_vbo)
-		glDeleteBuffers(1, &this->_vbo);
-	if (this->_ebo)
-		glDeleteBuffers(1, &this->_ebo);
-	if (this->_vao)
-		glDeleteVertexArrays(1, &this->_vao);
-
-	GenerateBuffers();
-	GenerateMesh();
 }
 
 // ========================================================================== //
