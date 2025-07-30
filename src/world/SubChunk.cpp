@@ -8,8 +8,6 @@ SubChunk::SubChunk(Chunk *parent, const i32 subChunkY)
 	:	_parent(parent), _subChunkY(subChunkY)
 {
 	// std::cout << "-> SubChunk Y: " << this->_subChunkY << " loaded" RESET << std::endl;
-
-	GenerateBuffers();
 }
 
 SubChunk::~SubChunk()
@@ -83,10 +81,6 @@ void	SubChunk::GenerateBuffers()
  */
 void	SubChunk::GenerateMesh()
 {
-	std::vector<u32>	vertices;
-	std::vector<u32>	indices;
-	u32					indexOffset = 0;
-
 	for (u8 vx = 0; vx < CHUNK_WIDTH; vx++)
 	for (u8 vy = 0; vy < CHUNK_HEIGHT; vy++)
 	for (u8 vz = 0; vz < CHUNK_WIDTH; vz++)
@@ -103,36 +97,24 @@ void	SubChunk::GenerateMesh()
 				continue ;
 
 			for (u8 i = 0; i < 4; i++)
-				vertices.push_back(BitShiftVoxel::Pack(vx, vy, vz, face, getFaceTexture(face, GetVoxel(vx, vy, vz))));
+				this->_vertices.push_back(BitShiftVoxel::Pack(vx, vy, vz, face, getFaceTexture(face, GetVoxel(vx, vy, vz))));
 
-			indices.push_back(indexOffset + 0);
-			indices.push_back(indexOffset + 1);
-			indices.push_back(indexOffset + 2);
-			indices.push_back(indexOffset + 2);
-			indices.push_back(indexOffset + 3);
-			indices.push_back(indexOffset + 0);
+			this->_indices.push_back(this->_indexOffset + 0);
+			this->_indices.push_back(this->_indexOffset + 1);
+			this->_indices.push_back(this->_indexOffset + 2);
+			this->_indices.push_back(this->_indexOffset + 2);
+			this->_indices.push_back(this->_indexOffset + 3);
+			this->_indices.push_back(this->_indexOffset + 0);
 
-			indexOffset += 4;
+			this->_indexOffset += 4;
 		}
 	}
-
-	glBindVertexArray(this->_vao);
-
-	glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(u32), vertices.data(), GL_STATIC_DRAW);
-
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_ebo);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(u32), indices.data(), GL_STATIC_DRAW);
-
-	this->_indexCount = indices.size();
-
-	glBindVertexArray(0);
 }
 
 /**
  * @brief Deletes old buffers to recreate them with an entirely new mesh.
  */
-void	SubChunk::ReloadMesh()
+void	SubChunk::SendMeshToGPU()
 {
 	if (this->_vbo)
 		glDeleteBuffers(1, &this->_vbo);
@@ -143,6 +125,18 @@ void	SubChunk::ReloadMesh()
 
 	GenerateBuffers();
 	GenerateMesh();
+
+	glBindVertexArray(this->_vao);
+
+	glBindBuffer(GL_ARRAY_BUFFER, this->_vbo);
+	glBufferData(GL_ARRAY_BUFFER, this->_vertices.size() * sizeof(u32), this->_vertices.data(), GL_STATIC_DRAW);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, this->_ebo);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, this->_indices.size() * sizeof(u32), this->_indices.data(), GL_STATIC_DRAW);
+
+	this->_indexCount = this->_indices.size();
+
+	glBindVertexArray(0);
 }
 
 // ========================================================================== //

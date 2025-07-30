@@ -6,48 +6,6 @@ static bool	isLoad(const i32 playerX, const i32 playerZ, const i32 chunkX, const
 //    Load                                                                    //
 // ========================================================================== //
 
-void	World::Load(const i32 playerX, const i32 playerZ)
-{
-	const i32	radius = RENDER_DISTANCE / 2;
-
-	std::vector<u64>	loadedChunkKey;
-
-	// 1. Create chunks + Generate SubChunks Voxels
-	for (i32 offsetZ = -radius; offsetZ <= radius; offsetZ++)
-	for (i32 offsetX = -radius; offsetX <= radius; offsetX++)
-	{
-		i32	chunkX = playerX + offsetX;
-		i32	chunkZ = playerZ + offsetZ;
-
-		if (!isLoad(playerX, playerZ, chunkX, chunkZ, radius))
-			continue ;
-
-		// Create the chunk
-		u64	currentChunkKey = BitShiftChunk::Pack(chunkX, chunkZ);
-		this->chunks[currentChunkKey] = new Chunk(chunkX, chunkZ);
-		loadedChunkKey.push_back(currentChunkKey);
-
-		// Create the subChunks
-		for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
-			this->chunks[currentChunkKey]->subChunks[chunkY]->GenerateVoxels();
-	}
-
-	// 2. Set neighbors
-	for (u64 key : loadedChunkKey)
-	{
-		i32	chunkX;
-		i32	chunkZ;
-
-		BitShiftChunk::Unpack(key, chunkX, chunkZ);
-		SetNeighbors(chunkX, chunkZ, key);
-	}
-
-	// 3. Generate buffers + meshes
-	for (u64 key : loadedChunkKey)
-	for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
-		this->chunks[key]->subChunks[chunkY]->GenerateMesh();
-}
-
 void	World::Reload(const i32 playerX, const i32 playerZ)
 {
 	const i32	radius = RENDER_DISTANCE / 2;
@@ -114,12 +72,12 @@ void	World::Reload(const i32 playerX, const i32 playerZ)
 	// 3. Generate buffers + meshes for newly loaded chunks
 	for (u64 key : newLoadedChunkKey)
 	for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
-		this->chunks[key]->subChunks[chunkY]->GenerateMesh();
+		this->chunks[key]->subChunks[chunkY]->SendMeshToGPU();
 
 	// 4. Reload buffers + meshes of neighboring chunks of newly loaded chunks
 	for (Chunk *chunk : chunksToUpdate)
 	for (u8 chunkY = 0; chunkY < SUBCHUNK_AMOUNT; chunkY++)
-		chunk->subChunks[chunkY]->ReloadMesh();
+		chunk->subChunks[chunkY]->SendMeshToGPU();
 }
 
 // ========================================================================== //

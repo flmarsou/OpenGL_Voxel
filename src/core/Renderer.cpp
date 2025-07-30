@@ -28,7 +28,7 @@ void	Renderer::Init()
 	// --- Camera ---
 	this->_camera.Init(WINDOW_WIDTH, WINDOW_HEIGHT, glm::vec3(16, 100, 16));
 
-	this->_world.Load(0, 0);
+	this->_world.Reload(0, 0);
 }
 
 // ========================================================================== //
@@ -37,6 +37,13 @@ void	Renderer::Init()
 
 void	Renderer::Render(GLFWwindow *win)
 {
+	bool	debug = false;
+
+	if (glfwGetKey(win, GLFW_KEY_F3) == GLFW_PRESS)
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	else
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
 	// --- Camera ---
 	this->_camera.Input(win);
 	this->_camera.Matrix(this->_voxelShader.program, "uCamera");

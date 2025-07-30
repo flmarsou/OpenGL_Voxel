@@ -58,7 +58,7 @@ class	SubChunk
 		// --- Mesh ---
 		void	GenerateBuffers();
 		void	GenerateMesh();
-		void	ReloadMesh();
+		void	SendMeshToGPU();
 
 		// --- Helper Methods ---
 		bool	IsSurrounded(const u8 voxelX, const u8 voxelY, const u8 voxelZ) const;
@@ -78,4 +78,8 @@ class	SubChunk
 		u32			_vbo;
 		u32			_ebo;
 		u32			_indexCount;
+
+		std::vector<u32>	_vertices;
+		std::vector<u32>	_indices;
+		u32					_indexOffset = 0;
 };
